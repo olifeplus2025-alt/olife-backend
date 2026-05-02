@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account - OlifePlus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond&family=Inter&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box }
+
+    :root {
+      --bg: #f9f9f6;
+      --fg: #0a2622;
+      --primary: #0a2622;
+      --secondary: #e8f2ec;
+      --accent: #b99470;
+      --border: #d0ddd5;
+      --muted: rgba(10, 38, 34, .6);
+      --success: #1f5b4f;
+      --danger: #b00020
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--secondary), var(--bg));
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+      color: var(--fg)
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: white;
+      box-shadow: 0 20px 50px rgba(10, 38, 34, .08);
+      overflow: hidden
+    }
+
+    .left { padding: 60px; background: rgba(249, 249, 246, .88) }
+
+    .left h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      margin-bottom: 10px
+    }
+
+    .subtext {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 22px;
+      max-width: 430px
+    }
+
+    .form-group { margin: 15px 0 }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      font-size: 15px;
+      outline: none;
+      background: #fff
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(185, 148, 112, .08)
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      margin-top: 12px;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: .22em;
+      text-transform: uppercase
+    }
+
+    button:hover { background: var(--accent) }
+    button:disabled { opacity: 0.6; cursor: not-allowed }
+
+    .msg {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      border: 1px solid transparent
+    }
+
+    .msg.success {
+      display: block;
+      color: var(--success);
+      background: rgba(232, 242, 236, .6);
+      border-color: rgba(10, 38, 34, .08)
+    }
+
+    .msg.error {
+      display: block;
+      color: var(--danger);
+      background: rgba(176, 0, 32, .05);
+      border-color: rgba(176, 0, 32, .12)
+    }
+
+    .right {
+      background: url('Home1.png') center/cover
+    }
+
+    .bottom-text {
+      margin-top: 15px;
+      text-align: center;
+      color: var(--muted)
+    }
+
+    .bottom-text a { color: var(--primary); text-decoration: none }
+
+    @media(max-width:900px) {
+      .wrapper { grid-template-columns: 1fr }
+      .right { min-height: 250px; order: -1 }
+      .left { padding: 38px 22px }
+      .grid-2 { grid-template-columns: 1fr }
+    }
+  </style>
+</head>
+
+<body >
+  <div class="wrapper">
+    <div class="left">
+      <h1>Create Account</h1>
+      <p class="subtext">Enter your details below. After clicking create account, your information will be saved and you
+        will be redirected to the login page.</p>
+
+      <form id="signupForm" novalidate>
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Enter full name" required>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter email" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" placeholder="Enter phone number">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" id="address" placeholder="Enter address (optional)">
+        </div>
+
+        <div class="form-group" style="position:relative;">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" required>
+          <span onclick="togglePassword('password', this)"
+            style="position:absolute; right:12px; top:38px; cursor:pointer;">👁️</span>
+        </div>
+
+        <div class="form-group" style="position:relative;">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+          <span onclick="togglePassword('confirmPassword', this)"
+            style="position:absolute; right:12px; top:38px; cursor:pointer;">👁️</span>
+        </div>
+
+        <button type="submit" id="submitBtn">Create Account</button>
+        <div class="msg" id="signupMsg"></div>
+      </form>
+
+      <div class="bottom-text">Already have account? <a href="login.html">Login</a></div>
+    </div>
+    <div class="right"></div>
+  </div>
+
+  <!-- ✅ Firebase Modular SDK -->
+  <script type="module">
+    import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, set }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // ✅ Firebase config
+    const app = initializeApp({
+      apiKey:            "AIzaSyD6D-SpipI6gIRo_FWZkRxBG1oOyAY6J7E",
+      authDomain:        "olifeplusweb.firebaseapp.com",
+      databaseURL:       "https://olifeplusweb-default-rtdb.firebaseio.com",
+      projectId:         "olifeplusweb",
+      storageBucket:     "olifeplusweb.firebasestorage.app",
+      messagingSenderId: "178557755300",
+      appId:             "1:178557755300:web:216d189f5a2cf8ed3fab31",
+    });
+
+    const auth = getAuth(app);
+    const db   = getDatabase(app);
+
+    const signupForm = document.getElementById("signupForm");
+    const signupMsg  = document.getElementById("signupMsg");
+    const submitBtn  = document.getElementById("submitBtn");
+
+    function showMsg(text, type) {
+      signupMsg.textContent = text;
+      signupMsg.className   = "msg " + type;
+    }
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name            = document.getElementById("name").value.trim();
+      const email           = document.getElementById("email").value.trim().toLowerCase();
+      const phone           = document.getElementById("phone").value.trim();
+      const address         = document.getElementById("address").value.trim();
+      const password        = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      // ── Validation ──────────────────────────────────
+      if (!name) {
+        showMsg("Full name enter karo.", "error"); return;
+      }
+      if (!email) {
+        showMsg("Email address enter karo.", "error"); return;
+      }
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        showMsg("Valid email address enter karo.", "error"); return;
+      }
+      if (!password) {
+        showMsg("Password enter karo.", "error"); return;
+      }
+      if (password.length < 6) {
+        showMsg("Password minimum 6 characters hovu joie.", "error"); return;
+      }
+      if (password !== confirmPassword) {
+        showMsg("Password match nathi thatu ❌", "error"); return;
+      }
+
+      submitBtn.disabled  = true;
+      submitBtn.innerText = "Creating...";
+
+      try {
+        // ✅ STEP 1 — Create user in Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const firebaseUser   = userCredential.user;
+
+        // ✅ STEP 2 — Save display name in Firebase Auth
+        await updateProfile(firebaseUser, { displayName: name });
+
+        // ✅ STEP 3 — Save extra data in Realtime Database
+        await set(ref(db, "users/" + firebaseUser.uid), {
+          uid:       firebaseUser.uid,
+          name,
+          email,
+          phone,
+          address,
+          createdAt: new Date().toISOString(),
+        });
+
+        // ✅ STEP 4 — Save in localStorage for local use
+        localStorage.setItem("olifeplusAccountData", JSON.stringify({
+          uid: firebaseUser.uid, name, email, phone, address
+        }));
+
+        showMsg("✅ Account created successfully! Redirecting to login...", "success");
+
+        setTimeout(() => { window.location.href = "login.html"; }, 1500);
+
+      } catch (error) {
+        console.error("Signup error:", error.code, error.message);
+
+        switch (error.code) {
+          case "auth/email-already-in-use":
+            showMsg("❌ Aa email thi already account exist che. Login karo.", "error");
+            break;
+          case "auth/invalid-email":
+            showMsg("❌ Valid email address enter karo.", "error");
+            break;
+          case "auth/weak-password":
+            showMsg("❌ Password minimum 6 characters hovu joie.", "error");
+            break;
+          case "auth/network-request-failed":
+            showMsg("⚠️ Internet connection check karo.", "error");
+            break;
+          default:
+            showMsg("❌ Error: " + error.code, "error");
+        }
+
+        submitBtn.disabled  = false;
+        submitBtn.innerText = "Create Account";
+      }
+    });
+
+    function togglePassword(fieldId, el) {
+      const input = document.getElementById(fieldId);
+      if (input.type === "password") {
+        input.type   = "text";
+        el.innerText = "🙈";
+      } else {
+        input.type   = "password";
+        el.innerText = "👁️";
+      }
+    }
+
+    // Make togglePassword available globally for onclick
+    window.togglePassword = togglePassword;
+  </script>
+
+</body>
+</html>
