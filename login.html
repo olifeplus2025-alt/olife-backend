@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - OlifePlus</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+
+    :root{
+      --bg:#f9f9f6;
+      --fg:#0a2622;
+      --primary:#0a2622;
+      --primary-fg:#f9f9f6;
+      --secondary:#e8f2ec;
+      --accent:#b99470;
+      --border:#d0ddd5;
+      --serif:'Cormorant Garamond',serif;
+      --sans:'Inter',sans-serif;
+      --transition:0.3s ease;
+      --danger:#b00020;
+      --success:#1f5b4f;
+    }
+
+    body{
+      font-family:var(--sans);
+      background:linear-gradient(135deg,var(--secondary) 0%,var(--bg) 55%,rgba(232,242,236,.35) 100%);
+      color:var(--fg);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .login-wrapper{
+      width:100%;
+      max-width:1100px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      background:rgba(255,255,255,.65);
+      backdrop-filter:blur(18px) saturate(140%);
+      border:1px solid rgba(10,38,34,.08);
+      overflow:hidden;
+      box-shadow:0 20px 50px rgba(10,38,34,.08);
+    }
+
+    .login-left{
+      padding:70px 60px;
+      background:rgba(249,249,246,.85);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .login-right{
+      min-height:680px;
+      background:
+        linear-gradient(rgba(10,38,34,.18), rgba(10,38,34,.18)),
+        url('login.jpeg') center/cover no-repeat;
+      position:relative;
+    }
+
+    .eyebrow{
+      font-size:11px;
+      letter-spacing:.3em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:18px;
+    }
+
+    .login-left h1{
+      font-family:var(--serif);
+      font-size:clamp(2.6rem,4vw,4.2rem);
+      line-height:1.02;
+      margin-bottom:18px;
+    }
+
+    .login-left h1 em{
+      font-style:italic;
+      font-weight:300;
+      color:var(--accent);
+    }
+
+    .subtext{
+      font-size:16px;
+      line-height:1.75;
+      color:rgba(10,38,34,.62);
+      margin-bottom:34px;
+      max-width:440px;
+    }
+
+    .login-form{ width:100%; max-width:430px; }
+
+    .form-group{ margin-bottom:18px; }
+
+    .form-group label{
+      display:block;
+      font-size:11px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:rgba(10,38,34,.5);
+      margin-bottom:8px;
+    }
+
+    .back{
+      margin-top:-40px;
+      margin-bottom:50px;
+      margin-left:-34px;
+    }
+
+    .back a{
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:rgba(10,38,34,.5);
+      text-decoration:none;
+      transition:color var(--transition);
+    }
+
+    .back a:hover{ color:var(--accent); }
+
+    .form-group input{
+      width:100%;
+      padding:15px 16px;
+      border:1px solid rgba(10,38,34,.15);
+      background:transparent;
+      color:var(--fg);
+      font-size:15px;
+      outline:none;
+      transition:border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .form-group input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(185,148,112,.08);
+    }
+
+    .login-btn{
+      width:100%;
+      margin-top:10px;
+      padding:17px;
+      background:var(--primary);
+      color:var(--primary-fg);
+      border:none;
+      font-size:12px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      font-weight:500;
+      cursor:pointer;
+      transition:background var(--transition);
+    }
+
+    .login-btn:hover{ background:var(--accent); }
+    .login-btn:disabled{ opacity:0.6; cursor:not-allowed; }
+
+    .signup-btn{
+      width:100%;
+      margin-top:10px;
+      padding:15px;
+      background:transparent;
+      color:var(--primary);
+      border:1px solid var(--primary);
+      font-size:12px;
+      letter-spacing:.24em;
+      text-transform:uppercase;
+      font-weight:500;
+      cursor:pointer;
+      transition:all 0.3s ease;
+    }
+
+    .signup-btn:hover{
+      background:var(--primary);
+      color:var(--primary-fg);
+    }
+
+    .extra-links{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .extra-links a{
+      font-size:12px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:rgba(10,38,34,.5);
+      text-decoration:none;
+      transition:color var(--transition);
+    }
+
+    .extra-links a:hover{ color:var(--accent); }
+
+    .msg{
+      margin-top:16px;
+      font-size:14px;
+      padding:12px 14px;
+      display:none;
+      border:1px solid transparent;
+      line-height:1.6;
+    }
+
+    .msg.success{
+      display:block;
+      color:var(--success);
+      background:rgba(232,242,236,.55);
+      border-color:rgba(10,38,34,.08);
+    }
+
+    .msg.error{
+      display:block;
+      color:var(--danger);
+      background:rgba(176,0,32,.05);
+      border-color:rgba(176,0,32,.12);
+    }
+
+    .brand-tag{
+      position:absolute;
+      bottom:30px;
+      left:30px;
+      background:rgba(249,249,246,.84);
+      backdrop-filter:blur(14px);
+      padding:18px 22px;
+      border:1px solid rgba(10,38,34,.08);
+      max-width:240px;
+    }
+
+    .brand-tag .small{
+      font-size:11px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:6px;
+    }
+
+    .brand-tag h3{
+      font-family:var(--serif);
+      font-size:24px;
+      line-height:1.2;
+    }
+
+    .brand-tag p{
+      margin-top:6px;
+      font-size:13px;
+      color:rgba(10,38,34,.58);
+    }
+
+    @media(max-width:900px){
+      .login-wrapper{ grid-template-columns:1fr; }
+      .login-right{ min-height:280px; order:-1; }
+      .login-left{ padding:42px 24px; }
+      .brand-tag{ left:20px; bottom:20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrapper">
+    <div class="login-left">
+      <div class="back">
+        <a href="index.html">&#8592; Back to Home</a>
+      </div>
+      <div class="eyebrow">Welcome Back</div>
+
+      <h1>Login to your <em>OlifePlus</em> account.</h1>
+      <p class="subtext">
+        Enter your email and password to continue your skincare journey.
+      </p>
+
+      <form class="login-form" id="loginForm">
+        <div class="form-group">
+          <label for="userInput">Email Address</label>
+          <input
+            type="email"
+            id="userInput"
+            placeholder="Enter your email address"
+            required
+          >
+        </div>
+
+        <div class="form-group" style="position:relative;">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" required>
+          <span onclick="togglePassword('password', this)"
+            style="position:absolute; right:12px; top:38px; cursor:pointer;">
+            👁️
+          </span>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">Login</button>
+
+        <div class="extra-links">
+          <a href="forgot-password.html">Forgot Password?</a>
+          <a href="index.html">Back to Home</a>
+        </div>
+
+        <div class="msg" id="loginMsg"></div>
+      </form>
+
+      <button onclick="window.location.href='signup.html'" class="signup-btn">
+        Create Account
+      </button>
+    </div>
+
+    <div class="login-right">
+      <div class="brand-tag">
+        <div class="small">Advance Ayurveda</div>
+        <h3>Pure care, refined ritual.</h3>
+        <p>Elegance inspired by nature, crafted for radiant skin.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Firebase Modular SDK -->
+  <script type="module">
+    import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, get }                  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const app = initializeApp({
+      apiKey:            "AIzaSyD6D-SpipI6gIRo_FWZkRxBG1oOyAY6J7E",
+      authDomain:        "olifeplusweb.firebaseapp.com",
+      databaseURL:       "https://olifeplusweb-default-rtdb.firebaseio.com",
+      projectId:         "olifeplusweb",
+      storageBucket:     "olifeplusweb.firebasestorage.app",
+      messagingSenderId: "178557755300",
+      appId:             "1:178557755300:web:216d189f5a2cf8ed3fab31",
+    });
+
+    const auth = getAuth(app);
+    const db   = getDatabase(app);
+
+    const loginForm = document.getElementById("loginForm");
+    const loginMsg  = document.getElementById("loginMsg");
+    const loginBtn  = document.getElementById("loginBtn");
+
+    function showMsg(text, type) {
+      loginMsg.textContent = text;
+      loginMsg.className   = "msg " + type;
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email    = document.getElementById("userInput").value.trim().toLowerCase();
+      const password = document.getElementById("password").value;
+
+      // Validate
+      if (!email) {
+        showMsg("Email address enter karo.", "error"); return;
+      }
+      if (!password) {
+        showMsg("Password enter karo.", "error"); return;
+      }
+
+      loginBtn.disabled  = true;
+      loginBtn.innerText = "Logging in...";
+
+      try {
+        // ✅ Firebase Auth login — checks real password
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const firebaseUser   = userCredential.user;
+
+        // ✅ Get extra data from Realtime Database
+        let userData = {
+          uid:   firebaseUser.uid,
+          name:  firebaseUser.displayName || "",
+          email: firebaseUser.email,
+        };
+
+        try {
+          const snapshot = await get(ref(db, "users/" + firebaseUser.uid));
+          if (snapshot.exists()) {
+            userData = { ...userData, ...snapshot.val() };
+          }
+        } catch (dbErr) {
+          console.warn("Database read warning:", dbErr);
+        }
+
+        // ✅ Save session in localStorage
+        localStorage.setItem("olifeplusLoggedIn",     "true");
+        localStorage.setItem("olifeplusCurrentUser",  JSON.stringify(userData));
+        localStorage.setItem("olifeplusAccountData",  JSON.stringify(userData));
+
+        showMsg("✅ Login successful! Redirecting...", "success");
+
+        setTimeout(() => {
+          window.location.href = "my-account.html";
+        }, 800);
+
+      } catch (error) {
+        console.error("Login error:", error.code);
+
+        loginBtn.disabled  = false;
+        loginBtn.innerText = "Login";
+
+        // ✅ Correct error messages
+        switch (error.code) {
+          case "auth/user-not-found":
+            showMsg("❌ Aa email thi koi account registered nathi.", "error");
+            break;
+          case "auth/wrong-password":
+            showMsg("❌ Password incorrect che. Fari try karo.", "error");
+            break;
+          case "auth/invalid-credential":
+            showMsg("❌ Email ya password incorrect che.", "error");
+            break;
+          case "auth/invalid-email":
+            showMsg("❌ Valid email address enter karo.", "error");
+            break;
+          case "auth/too-many-requests":
+            showMsg("⚠️ Vadhare attempts. Thodi var rahi ne fari try karo ya Forgot Password use karo.", "error");
+            break;
+          case "auth/network-request-failed":
+            showMsg("⚠️ Internet connection check karo.", "error");
+            break;
+          default:
+            showMsg("❌ Error: " + error.code, "error");
+        }
+      }
+    });
+
+    function togglePassword(fieldId, el) {
+      const input = document.getElementById(fieldId);
+      if (input.type === "password") {
+        input.type   = "text";
+        el.innerText = "🙈";
+      } else {
+        input.type   = "password";
+        el.innerText = "👁️";
+      }
+    }
+
+    window.togglePassword = togglePassword;
+  </script>
+
+</body>
+</html>

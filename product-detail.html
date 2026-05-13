@@ -1,0 +1,944 @@
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Detail — OlifePlus</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+      #navbar {
+        transition: transform 0.4s ease;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 48px;
+        align-items: start;
+      }
+
+      .detail-gallery {
+        width: 100%;
+      }
+
+      .detail-main-wrap {
+        position: relative;
+        width: 100%;
+        background: #fff;
+        border-radius: 26px;
+        padding: 16px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, .08);
+        border: 1px solid rgba(0, 0, 0, .06);
+        overflow: hidden;
+      }
+
+      .detail-main-image {
+        width: 100%;
+        height: 400px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #f8f8f8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .detail-main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        background: #fff;
+      }
+
+      /* IMAGE ANIMATION */
+      .detail-main-image img {
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+
+      .img-animate {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      .img-show {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .gallery-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        background: #0f4b3a;
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 2;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
+      }
+
+      .gallery-arrow.prev {
+        left: 16px;
+      }
+
+      .gallery-arrow.next {
+        right: 16px;
+      }
+
+      .thumb-row-wrap {
+        margin-top: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .thumb-row {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        width: 100%;
+        padding: 4px 2px 10px;
+        scrollbar-width: none;
+      }
+
+      .thumb-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .thumb {
+        min-width: 96px;
+        width: 96px;
+        height: 96px;
+        border-radius: 16px;
+        background: #fff;
+        border: 2px solid transparent;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
+        flex-shrink: 0;
+      }
+
+      .thumb.active {
+        border-color: #0f4b3a;
+        transform: translateY(-2px);
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .thumb-scroll-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        background: #0f4b3a;
+        color: #fff;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .detail-benefits {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+
+      .benefit-item {
+        padding: 12px 14px;
+        border: 1px solid rgba(0, 0, 0, .08);
+        border-radius: 14px;
+        background: #fff;
+        font-weight: 500;
+        color: #21372d;
+      }
+
+      /* ===== MOBILE RESPONSIVE FIX ===== */
+
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* CONTAINER FIX */
+.container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* PRODUCT IMAGE FULL COVER */
+.detail-main-image {
+  width: 100%;
+  height: 650px;
+  background: #f8f8f8;
+  overflow: hidden;
+}
+
+.detail-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* FOOTER FIX */
+footer {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  background: #032d25;
+  box-sizing: border-box;
+}
+
+.footer-inner {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.footer-col {
+  min-width: 180px;
+}
+
+.footer-bottom {
+  width: 100%;
+  text-align: center;
+  padding-top: 25px;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+
+/* MOBILE FIX */
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .container {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .detail-main-wrap {
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .detail-main-image {
+    height: 500px;
+    border-radius: 16px;
+  }
+
+  .detail-main-image img {
+    object-fit: cover;
+  }
+
+  .gallery-arrow {
+    width: 42px;
+    height: 42px;
+    font-size: 15px;
+  }
+
+  .gallery-arrow.prev {
+    left: 10px;
+  }
+
+  .gallery-arrow.next {
+    right: 10px;
+  }
+
+  .thumb-row {
+    gap: 10px;
+    padding-bottom: 4px;
+  }
+
+  .thumb {
+    min-width: 74px;
+    width: 74px;
+    height: 74px;
+  }
+
+  .detail-content {
+    width: 100%;
+  }
+
+  .detail-content h1 {
+    font-size: 34px;
+    line-height: 1.15;
+  }
+
+  .detail-price {
+    font-size: 32px;
+  }
+
+  .btn-add-detail {
+    width: 100%;
+  }
+
+  /* FOOTER MOBILE */
+  footer {
+    padding: 50px 0 25px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 35px;
+  }
+
+  .footer-logo img {
+    max-width: 180px;
+    margin: auto;
+  }
+
+  .footer-desc {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .footer-socials {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .footer-col {
+    width: 100%;
+  }
+
+  .footer-col ul {
+    padding: 0;
+  }
+
+  .footer-col li {
+    list-style: none;
+    margin-bottom: 10px;
+  }
+
+  .footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+  }
+
+  .footer-bottom p {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* NAVBAR FIX */
+  .nav-inner {
+    padding: 14px;
+  }
+
+  .nav-logo img {
+    max-width: 140px;
+  }
+
+  /* REMOVE EXTRA WHITE SPACE */
+  * {
+    max-width: 100%;
+  }
+}
+
+      @media (max-width: 992px) {
+        .detail-grid {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+
+        .detail-main-image {
+          height: 460px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .detail-main-wrap {
+          padding: 12px;
+          border-radius: 20px;
+        }
+
+        .detail-main-image {
+          height: 340px;
+          border-radius: 16px;
+        }
+
+        .gallery-arrow {
+          width: 40px;
+          height: 40px;
+          font-size: 15px;
+        }
+
+        .thumb {
+          min-width: 78px;
+          width: 78px;
+          height: 78px;
+        }
+
+        .thumb-scroll-btn {
+          width: 34px;
+          height: 34px;
+        }
+
+        .detail-benefits {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* --- આ ફેરફાર મુખ્ય ઈમેજ કન્ટેનર માટે છે --- */
+.detail-main-image {
+  width: 100%;
+  height: auto; /* ફિક્સ્ડ હાઈટ કાઢી નાખી */
+  aspect-ratio: 1 / 1; /* ફોટો ચોરસ રાખવા માટે */
+  background: #f8f8f8;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 'cover' ને બદલે 'contain' વાપર્યું જેથી ફોટો કપાય નહીં */
+  display: block;
+}
+
+/* --- મોબાઈલ માટે ખાસ સુધારો (Responsive) --- */
+@media (max-width: 768px) {
+  .detail-main-image {
+    height: auto; /* મોબાઈલમાં પણ હાઈટ ઓટો રહેશે */
+    aspect-ratio: 1 / 1;
+    margin-top: 10px;
+  }
+
+  /* એરો બટન્સ ને ઈમેજની અંદર વ્યવસ્થિત કરવા */
+  .gallery-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    background: rgba(15, 75, 58, 0.8); /* થોડું ટ્રાન્સપરન્ટ */
+  }
+
+  .gallery-arrow.prev {
+    left: 10px;
+  }
+
+  .gallery-arrow.next {
+    right: 10px;
+  }
+  
+  /* થંબનેલ (નાની ઈમેજીસ) ને મોબાઈલમાં સેટ કરવા */
+  .thumb {
+    min-width: 65px;
+    width: 65px;
+    height: 65px;
+  }
+}
+.detail-back-wrap{
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+    </style>
+  </head>
+
+  <body data-page="product-detail">
+
+    <nav id="navbar">
+      <div class="nav-inner">
+        <a class="nav-logo" href="index.html">
+          <img src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png"
+            alt="OlifePlus">
+        </a>
+
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="products.html" class="active">Products</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <!-- <li><a href="my-account.html">My Account</a></li> -->
+        </ul>
+
+        <div class="nav-right">
+          <a href="login.html" id="account-link"><button class="btn-login" id="account-btn">&#128100; Login</button></a>
+          <a href="cart.html"> <button class="btn-cart" onclick="openCart()">
+              <span id="cart-icon-wrap">&#128717;</span>
+              <span class="hidden sm-inline">Cart</span>
+              <span class="cart-badge" id="cart-badge">0</span>
+            </button> </a>
+          <div class="hamburger" onclick="toggleMobileMenu()">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div id="mobile-menu">
+      <div id="close-menu" onclick="toggleMobileMenu()">&#10005;</div>
+      <a href="index.html" onclick="toggleMobileMenu()">Home</a>
+      <a href="products.html" onclick="toggleMobileMenu()">Products</a>
+      <a href="about.html" onclick="toggleMobileMenu()">About Us</a>
+      <a href="contact.html" onclick="toggleMobileMenu()">Contact</a>
+      <a href="privacy.html" onclick="toggleMobileMenu()">Privacy</a>
+      <a href="blog.html" onclick="toggleMobileMenu()">Blog</a>
+    </div>
+
+    <div class="container">
+      <button class="detail-back" onclick="window.location.href='products.html'">&#8592;</button>
+
+      <div class="container">
+
+  <div class="detail-back-wrap">
+    <button class="detail-back"
+      onclick="window.location.href='products.html'">
+      &#8592; Back to Collection
+    </button>
+  </div>
+      <div class="detail-grid">
+        <div class="detail-gallery">
+          <div class="detail-main-wrap">
+            <button class="gallery-arrow prev" id="prevBtn" type="button">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+
+            <div class="detail-main-image">
+              <img id="detail-img" src="frontpage.jpeg" alt="OlifePlus Charcoal Goat Milk Handmade Soap">
+            </div>
+
+            <button class="gallery-arrow next" id="nextBtn" type="button">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <div class="thumb-row-wrap">
+            <button id="thumbPrev" type="button">
+            </button>
+
+            <div class="thumb-row" id="thumb-row">
+              <div class="thumb active" data-index="0">
+                <img src="frontpage.jpeg" alt="Front Packaging">
+              </div>
+
+              <div class="thumb" data-index="1">
+                <img src="price-tag.png" alt="Price Tag">
+              </div>
+
+              <div class="thumb" data-index="2">
+                <img src="ingredients.png" alt="Ingredients">
+              </div>
+
+              <div class="thumb" data-index="3">
+                <img src="product.png" alt="Product Photo">
+              </div>
+
+              <div class="thumb" data-index="4">
+                <img src="lifestyle.png" alt="Lifestyle Photo">
+              </div>
+            </div>
+
+            <button id="thumbNext" type="button">
+            </button>
+          </div>
+        </div>
+
+
+
+        <div class="detail-content">
+          <span class="label" id="detail-tag">Best Seller</span>
+          <h1 id="detail-name">OlifePlus Charcoal Goat Milk Handmade Soap</h1>
+          <div class="detail-price" id="detail-price">₹199</div>
+
+          <div class="rule" style="margin:0 0 28px"></div>
+
+          <p class="detail-desc" id="detail-desc">
+            A deep cleansing handmade soap enriched with activated charcoal and goat milk.
+            Helps remove impurities, refresh skin, and support a clean natural glow.
+          </p>
+
+          <div class="detail-benefits" id="detail-benefits">
+            <div class="benefit-item">Deep Cleanses</div>
+            <div class="benefit-item">Removes Toxins</div>
+            <div class="benefit-item">Reduces acne"</div>
+            <div class="benefit-item">Maintains Natural Balance
+
+
+            </div>
+          </div>
+
+          <div class="rule" style="margin:0 0 28px"></div>
+
+          <div class="qty-row">
+            <span class="qty-label">Quantity</span>
+            <div class="qty-ctrl">
+              <button onclick="changeDetailQty(-1)">&#8722;</button>
+              <span class="qty-val" id="detail-qty">1</span>
+              <button onclick="changeDetailQty(1)">&#43;</button>
+            </div>
+          </div>
+
+          <button class="btn-add-detail" id="btn-add-detail" onclick="addDetailToCart()">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png" alt="OlifePlus">
+          </div>
+          <p class="footer-desc">
+            OlifePlus brings you precision-crafted Ayurvedic skincare — pure, botanical, and built for radiant everyday wellness.
+          </p>
+
+          <div class="footer-socials">
+            <a href="https://www.instagram.com/olifeplus?utm_source=qr&amp;igsh=cWQ0M2ZlcXhjNnVl" target="_blank" title="Instagram" style="text-decoration:none;">
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="tel:+918780803334" title="Contact" style="text-decoration:none;">
+              <i class="fa-solid fa-phone"></i>
+            </a>
+            <a href="https://wa.me/918780803334" target="_blank" title="WhatsApp" style="text-decoration:none;">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="blog.html">Journal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Care</h4>
+          <ul>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="tel:+918780803334">+91 87808 03334</a></li>
+            <li><span>info@olifeplus.com</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 OlifePlus. Advance Ayurveda. All rights reserved.</p>
+        <a href="https://www.visionboostmarketing.com" target="_blank" style="text-decoration:none;color:inherit;">
+            <p style="letter-spacing:.2em;text-transform:uppercase">
+              Created By VisionBoost Marketing
+            </p>
+          </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const PRODUCTS_DATA = {
+        "coconut-saffron": {
+          id: "coconut-saffron",
+          tag: "Glow & Clarity",
+          name: "Charcoal Goat Milk Soap",
+          price: 199,
+          description: "Deep cleansing and hydration in one soap. Detoxifies skin while keeping it soft and nourished.",
+          benefits: [
+            "Deep Cleanses & Removes Toxins",
+            "Hydrates & Nourishes Skin",
+            "Reduces Acne & Excess Oil",
+            "Maintains Natural Skin Balance"
+          ],
+          images: [
+            "frontpage.jpeg",
+            "product.png",
+            "ingredients.png",
+            "lifestyle.png",
+            "price-tag.png"
+          ]
+        },
+
+        "herbal-glow": {
+          id: "herbal-glow",
+          tag: "Balance & Renewal",
+          name: "Clear Skin Care Soap",
+          price: 199,
+          description: "A glycerine bathing bar enriched with Ayurvedic herbs. Keeps skin soft, moisturized, and protected from dryness.",
+          benefits: [
+            "Moisturizes & Prevents Dryness",
+            "Enriched with Ayurvedic Herbs",
+            "Keeps Skin Soft & Healthy",
+            "Suitable for All Weather"
+          ],
+          images: [
+            "frontpage(2).png",
+            "product(2).png",
+            "ingredients(2).png",
+            "lifestyle(2).png",
+            "price-tag(2).png"
+          ]
+        },
+
+        "neem-tulsi": {
+          id: "neem-tulsi",
+          tag: "Clarity & Protection",
+          name: "Natural Glow Handmade Soap",
+          price: 199,
+          description: "A natural neem and tulsi soap that deeply cleans and protects your skin. Helps remove impurities while keeping skin fresh and clear.",
+          benefits: [
+            "Deep Cleans & Purifies Skin",
+            "Helps Reduce Acne & Blemishes",
+            "Herbal Protection from Germs",
+            "Gentle for Daily Use"
+          ],
+          images: [
+            "frontpage(3).png",
+            "product(3).png",
+            "ingredients(3).png",
+            "lifestyle(3).png",
+            "price-tag(3).png"
+          ]
+        },
+
+        "rose-sandal": {
+          id: "rose-sandal",
+          tag: "Softness & Ritual",
+          name: "Coconut Saffron Glow Soap",
+          price: 199,
+          description: "A nourishing soap with coconut oil and saffron.Gives soft, bright, and healthy skin",
+          benefits: [
+            "Brightens skin",
+            "Reduces pigmentation",
+            "Deep nourishment",
+            "Sun protection"
+          ],
+          images: [
+            "frontpage(4).png",
+            "product(4).png",
+            "ingredients(4).png",
+            "lifestyle(4).png",
+            "price-tag(4).png"
+          ]
+        }
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const productId = params.get("id") || "coconut-saffron";
+      const product = PRODUCTS_DATA[productId] || PRODUCTS_DATA["coconut-saffron"];
+
+      let galleryImages = product.images;
+      let currentImageIndex = 0;
+      let detailQty = 1;
+      const navbar = document.getElementById("navbar");
+      const mainImage = document.getElementById("detail-img");
+      const detailTag = document.getElementById("detail-tag");
+      const detailName = document.getElementById("detail-name");
+      const detailPrice = document.getElementById("detail-price");
+      const detailDesc = document.getElementById("detail-desc");
+      const detailBenefits = document.getElementById("detail-benefits");
+      const thumbRow = document.getElementById("thumb-row");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const thumbPrev = document.getElementById("thumbPrev");
+      const thumbNext = document.getElementById("thumbNext");
+
+      function hideNavbarTemporarily() {
+        if (!navbar) return;
+
+        navbar.style.transform = "translateY(-100%)"; // hide
+
+        setTimeout(() => {
+          navbar.style.transform = "translateY(0)"; // show back
+        }, 800); // 0.8 sec
+      }
+      function renderProductDetails() {
+        detailTag.textContent = product.tag;
+        detailName.textContent = product.name;
+        detailPrice.textContent = "₹" + product.price;
+        detailDesc.textContent = product.description;
+
+        detailBenefits.innerHTML = product.benefits
+          .map(item => `<div class="benefit-item">${item}</div>`)
+          .join("");
+
+        mainImage.src = galleryImages[0];
+        mainImage.alt = product.name;
+
+        thumbRow.innerHTML = galleryImages.map((img, index) => {
+          return `
+        <div class="thumb ${index === 0 ? "active" : ""}" data-index="${index}">
+          <img src="${img}" alt="${product.name} ${index + 1}">
+        </div>
+      `;
+        }).join("");
+      }
+
+      function updateMainImage(skipScroll = false) {
+        const img = mainImage;
+
+        // 🔥 start animation (fade out + zoom out)
+        img.classList.add("img-animate");
+
+        setTimeout(() => {
+          img.src = galleryImages[currentImageIndex];
+
+          // 🔥 show animation (fade in + zoom in)
+          img.classList.remove("img-animate");
+          img.classList.add("img-show");
+
+          setTimeout(() => {
+            img.classList.remove("img-show");
+          }, 400);
+
+        }, 200);
+
+        const thumbs = document.querySelectorAll(".thumb");
+        thumbs.forEach((thumb, index) => {
+          thumb.classList.toggle("active", index === currentImageIndex);
+        });
+
+        if (!skipScroll && thumbs[currentImageIndex]) {
+          const thumbContainer = document.getElementById("thumb-row");
+
+          thumbContainer.scrollTo({
+            left: thumbs[currentImageIndex].offsetLeft - 100,
+            behavior: "smooth"
+          });
+        }
+      }
+
+      function bindThumbEvents() {
+        const thumbs = document.querySelectorAll(".thumb");
+
+        thumbs.forEach((thumb) => {
+          thumb.addEventListener("click", function () {
+            currentImageIndex = Number(this.dataset.index);
+            updateMainImage();
+            hideNavbarTemporarily();
+          });
+        });
+      }
+
+      function nextImage() {
+        currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+        updateMainImage();
+        hideNavbarTemporarily();
+      }
+
+      function prevImage() {
+        currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+        updateMainImage();
+        hideNavbarTemporarily();
+      }
+
+      prevBtn.addEventListener("click", prevImage);
+      nextBtn.addEventListener("click", nextImage);
+
+      thumbPrev.addEventListener("click", function () {
+        thumbRow.scrollBy({ left: -220, behavior: "smooth" });
+      });
+
+      thumbNext.addEventListener("click", function () {
+        thumbRow.scrollBy({ left: 220, behavior: "smooth" });
+      });
+
+      window.changeDetailQty = function (change) {
+        detailQty += change;
+        if (detailQty < 1) detailQty = 1;
+        document.getElementById("detail-qty").textContent = detailQty;
+      };
+
+      window.addDetailToCart = function () {
+        const cartProduct = {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: galleryImages[0],
+          quantity: detailQty
+        };
+
+        let cart = JSON.parse(localStorage.getItem("olifeplusCart")) || [];
+        const existing = cart.find(item => item.id === cartProduct.id);
+
+        if (existing) {
+          existing.quantity += detailQty;
+        } else {
+          cart.push(cartProduct);
+        }
+
+        localStorage.setItem("olifeplusCart", JSON.stringify(cart));
+
+        if (typeof updateCartUI === "function") {
+          updateCartUI();
+        }
+
+        const badge = document.getElementById("cart-badge");
+        if (badge) {
+          const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+          badge.textContent = totalQty;
+          badge.classList.toggle("show", totalQty > 0);
+        }
+
+        alert(product.name + " added to cart successfully");
+      };
+
+      renderProductDetails();
+      bindThumbEvents();
+      updateMainImage();
+      window.scrollTo(0, 0);
+      const savedCart = JSON.parse(localStorage.getItem("olifeplusCart")) || [];
+      const badge = document.getElementById("cart-badge");
+      if (badge) {
+        const totalQty = savedCart.reduce((sum, item) => sum + item.quantity, 0);
+        badge.textContent = totalQty;
+        badge.classList.toggle("show", totalQty > 0);
+      }
+    });
+  </script>
+</body>
+
+</html>

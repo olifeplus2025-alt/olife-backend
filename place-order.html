@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Place Order</title>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0
+    }
+
+    .box {
+      background: #fff;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+      max-width: 520px
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #eee;
+      border-top: 4px solid #0a2622;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: auto
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 15px;
+      background: #0a2622;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      display: none
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: 10px;
+      line-height: 1.5
+    }
+
+    .success {
+      color: green;
+      font-size: 13px;
+      margin-top: 10px
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <div class="spinner" id="spinner"></div>
+    <h2>Processing Order...</h2>
+    <p id="msg">Please wait...</p>
+    <p class="error" id="errorMsg"></p>
+    <p class="success" id="successMsg"></p>
+    <button id="btn" onclick="location.href='track-order.html'">Track Order</button>
+  </div>
+  <script>
+      const BACKEND_URL = "https://olife-backend.onrender.com";
+    const cart = JSON.parse(localStorage.getItem("olifeplusCart") || "[]");
+    const checkout = JSON.parse(localStorage.getItem("olifeplusCheckoutDetails") || "{}");
+    const user = JSON.parse(localStorage.getItem("olifeplusCurrentUser") || localStorage.getItem("olifeplusAccountData") || "null");
+
+    function round(v) { return Math.round(Number(v) || 0); }
+    function calcAmounts(paymentType) {
+      const subtotal = cart.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 1)), 0);
+      const shipping = subtotal === 0 ? 0 : (subtotal >= 499 ? 0 : 49);
+      const base = subtotal + shipping;
+      const codCharge = paymentType === "COD" ? Math.ceil(base * 0.05) : 0;
+      return { subtotal: round(subtotal), shipping: round(shipping), codCharge: round(codCharge), total: round(base + codCharge) };
+    }
+    function getUserKey(u) { return u ? String(u.userInput || u.email || u.phone || "").trim().toLowerCase() : ""; }
+    function setMsg(t) { document.getElementById("msg").innerText = t; }
+    function done(t) { document.querySelector(".spinner").style.display = "none"; document.getElementById("msg").innerText = t; document.getElementById("btn").style.display = "inline-block"; }
+    function showError(t) { document.getElementById("errorMsg").innerText = t; console.error(t); }
+    function showSuccess(t) { document.getElementById("successMsg").innerText = t; }
+    function readJson(k, f) { try { return JSON.parse(localStorage.getItem(k) || JSON.stringify(f)); } catch (e) { return f; } }
+    function upsertOrderInStorage(order) {
+      ["orders", "olifeplusOrderHistory"].forEach(key => {
+        let list = readJson(key, []);
+        if (!Array.isArray(list)) list = [];
+        list = list.filter(o => String(o.orderId || "") !== String(order.orderId || ""));
+        list.unshift(order);
+        localStorage.setItem(key, JSON.stringify(list));
+      });
+      localStorage.setItem("olifeplusFinalOrder", JSON.stringify(order));
+      localStorage.setItem("olifeplusTrackOrderId", order.orderId);
+    }
+    async function sendToNimbus(order) {
+      try {
+        setMsg("Sending order to Nimbuspost...");
+        const res = await fetch(`${BACKEND_URL}/create-shipment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(order) });
+        const data = await res.json();
+        console.log("Nimbus Response:", data);
+        localStorage.setItem("olifeplusNimbusResponse", JSON.stringify(data));
+        if (data.success && data.awb) {
+          showSuccess(`Shipment created ✓ AWB: ${data.awb}`);
+          return {
+            ...order,
+            awb: data.awb,
+            nimbusOrderId: data.order?.nimbusOrderId, // 🔥 ADD THIS
+            nimbusResponse: data.nimbus || data,
+            shipmentStatus: "Created"
+          };
+        }
+        showError("Shipment creation issue: " + (data.message || data.nimbus?.message || "Check Nimbus dashboard/rules"));
+        return { ...order, nimbusResponse: data.nimbus || data, shipmentStatus: "Failed" };
+      } catch (err) {
+        showError("Backend/Nimbus error: " + err.message);
+        return { ...order, shipmentStatus: "Failed", nimbusError: err.message };
+      }
+    }
+    async function placeOrder(extra = {}) {
+      const paymentType = checkout.paymentType || "COD";
+      const amounts = calcAmounts(paymentType);
+      const address = checkout.address || [checkout.houseNumber, checkout.floor, checkout.building, checkout.societyName, checkout.landmark, checkout.area].filter(Boolean).join(", ");
+      let order = {
+        orderId: "ORD" + Date.now(),
+        name: checkout.customerName || user?.name || "Customer",
+        phone: checkout.phoneNumber || user?.phone || "",
+        email: checkout.email || user?.email || "customer@gmail.com",
+        address, city: checkout.city || "", state: checkout.state || "", pincode: checkout.pincode || "",
+        customerName: checkout.customerName || user?.name || "Customer",
+        phoneNumber: checkout.phoneNumber || user?.phone || "",
+        userKey: checkout.userKey || getUserKey(user), userEmail: checkout.userEmail || user?.email || "", userPhone: checkout.userPhone || user?.phone || "",
+        houseNumber: checkout.houseNumber || "", floor: checkout.floor || "", building: checkout.building || "", societyName: checkout.societyName || "", landmark: checkout.landmark || "", area: checkout.area || "",
+        paymentMethod: paymentType, paymentType, paymentOption: checkout.paymentOption || (paymentType === "COD" ? "Cash on Delivery" : "Online Payment"),
+        subtotal: amounts.subtotal, shipping: amounts.shipping, codCharge: amounts.codCharge, total: amounts.total,
+        items: cart, orderedAt: new Date().toISOString(), ...extra
+      };
+      upsertOrderInStorage(order);
+      order = await sendToNimbus(order);
+      upsertOrderInStorage(order);
+      localStorage.removeItem("olifeplusCart");
+      done("Order placed successfully!");
+      setTimeout(() => location.href = "track-order.html", 3000);
+    }
+    if (!cart.length) { done("Cart is empty."); }
+    else if ((checkout.paymentType || "COD") === "COD") {
+      placeOrder({ status: "Order Placed", paymentStatus: "Pending" });
+    } else {
+      const amounts = calcAmounts("NETBANKING");
+      const rzp = new Razorpay({
+        key: "rzp_live_ShDIzn71alHI2j", amount: Math.round(amounts.total * 100), currency: "INR", name: "OlifePlus",
+        handler: function (response) { placeOrder({ status: "Order Placed", paymentStatus: "Paid", paymentId: response.razorpay_payment_id }); },
+        modal: { ondismiss: function () { showError("Payment cancelled. Please try again."); done("Payment was not completed."); } },
+        prefill: { name: checkout.customerName || user?.name || "", contact: checkout.phoneNumber || user?.phone || "", email: checkout.email || user?.email || "" }
+      });
+      rzp.open();
+    }
+  </script>
+</body>
+
+</html>

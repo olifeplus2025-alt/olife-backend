@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Update Order Status</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f9f9f6;color:#0a2622;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .box{background:#fff;padding:28px;max-width:460px;width:100%;box-shadow:0 18px 40px rgba(10,38,34,.08)}
+    input,select,button{width:100%;padding:13px;margin:9px 0;border:1px solid #d0ddd5}
+    button{background:#0a2622;color:#fff;border:0;cursor:pointer;text-transform:uppercase;letter-spacing:.12em}
+    .msg{margin-top:12px;line-height:1.6}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Update Order Status</h2>
+  <input id="orderId" placeholder="Order ID">
+  <select id="step">
+    <option value="0">Order Placed</option>
+    <option value="1">Confirmed</option>
+    <option value="2">Packed</option>
+    <option value="3">Shipped</option>
+    <option value="4">Out for Delivery</option>
+    <option value="5">Delivered</option>
+  </select>
+  <button onclick="updateStatus()">Update Status</button>
+  <div class="msg" id="msg"></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-helpers.js"></script>
+<script>
+const steps = ["Order Placed","Confirmed","Packed","Shipped","Out for Delivery","Delivered"];
+async function updateStatus(){
+  const orderId = document.getElementById('orderId').value.trim();
+  const step = Number(document.getElementById('step').value);
+  if(!orderId){ document.getElementById('msg').innerText='Enter order id'; return; }
+  try{
+    if(window.OlifeFirebase && window.OlifeFirebase.updateOrderStatus){
+      await window.OlifeFirebase.updateOrderStatus(orderId, steps[step], step);
+    }
+    let orders = JSON.parse(localStorage.getItem('olifeplusOrderHistory') || '[]');
+    orders = orders.map(o => o.orderId === orderId ? {...o, status: steps[step], currentStep: step, updatedAt: new Date().toISOString()} : o);
+    localStorage.setItem('olifeplusOrderHistory', JSON.stringify(orders));
+    document.getElementById('msg').innerText='Status updated successfully.';
+  }catch(e){
+    document.getElementById('msg').innerText=e.message;
+  }
+}
+</script>
+</body>
+</html>

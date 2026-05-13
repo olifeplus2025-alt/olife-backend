@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OlifePlus — Advance Ayurveda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body data-page="home">
+  <!-- ═══════════════════════════════════════ NAVBAR ═══ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a class="nav-logo" href="index.html" class="active">
+        <img src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png"
+          alt="OlifePlus">
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="blog.html">Blog</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="login.html"><button class="btn-login">&#128100; Login</button></a>
+        <button class="btn-cart" onclick="openCart()">
+          <span id="cart-icon-wrap">&#128717;</span>
+          <span class="hidden sm-inline">Cart</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </button>
+        <div class="hamburger" onclick="toggleMobileMenu()">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════ MOBILE MENU ═══ -->
+  <div id="mobile-menu">
+    <div id="close-menu" onclick="toggleMobileMenu()">&#10005;</div>
+    <a href="index.html" onclick="toggleMobileMenu()">Home</a>
+    <a href="products.html" onclick="toggleMobileMenu()">Products</a>
+    <a href="about.html" onclick="toggleMobileMenu()">About Us</a>
+    <a href="contact.html" onclick="toggleMobileMenu()">Contact</a>
+    <a href="privacy.html" onclick="toggleMobileMenu()">Privacy</a>
+    <a href="blog.html" onclick="toggleMobileMenu()">Blog</a>
+    <a href="login.html" id="mobile-account-link" onclick="toggleMobileMenu()">&#128100; Login</a>
+</div>
+
+  <!-- ═══════════════════════════════════════ GHOST CART ═══ -->
+  <div id="cart-overlay" onclick="closeCart()"></div>
+  <aside id="ghost-cart">
+    <div class="gc-header">
+      <div>
+        <div class="sub">Your Vitality Kit</div>
+        <h2 id="gc-title">0 Items</h2>
+      </div>
+      <button class="gc-close" onclick="closeCart()">&#10005;</button>
+    </div>
+    <div class="gc-ship" id="gc-ship-bar">
+      <div class="sh-msg" id="gc-ship-msg">Add <span>₹499</span> for free shipping</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="gc-bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="gc-items" id="gc-items-list">
+      <div class="gc-empty" id="gc-empty">
+        <div class="e-icon">&#128717;</div>
+        <h3>Your kit is empty</h3>
+        <p>Begin your ritual. Add a product to start your OlifePlus journey.</p>
+        <button class="btn-discover" onclick="closeCart();window.location.href='products.html'">Discover</button>
+      </div>
+    </div>
+    <div class="gc-footer" id="gc-footer" style="display:none">
+      <div class="gc-subtotal">
+        <span class="s-label">Subtotal</span>
+        <span class="s-val" id="gc-subtotal-val">₹0</span>
+      </div>
+      <button class="gc-checkout" onclick="closeCart();window.location.href='cart.html'">
+        &#128274; Secure Checkout
+      </button>
+      <button class="gc-continue" onclick="closeCart()">Continue Shopping</button>
+    </div>
+  </aside>
+
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="fade-up">
+          <div class="hero-eyebrow">
+            <div class="line"></div><span>Advance Ayurveda</span>
+          </div>
+          <h1>Coconut Saffron<br><em>Glow Ritual.</em></h1>
+          <p class="hero-desc">A liquid, reactive wellness ecosystem. Clinically pure, botanically precise — skincare
+            designed for your daily ritual of radiance.</p>
+          <div class="hero-cta">
+            <button class="btn-primary" onclick="window.location.href='products.html'">Shop the Ritual &#8594;</button>
+            <button class="btn-ghost" onclick="window.location.href='about.html'">Our Story</button>
+          </div>
+        </div>
+        <div class="hero-img-wrap fade-up">
+          <div class="hero-img">
+            <video class="hover-video" src="Aesthetic_Advertisement_Video_Generated.mp4" muted loop></video>
+            <img src="Home1.png" alt="Hero" class="hover-image">
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head row">
+        <div>
+          <span class="label">The Collection</span>
+          <h2>Best-Selling Rituals</h2>
+        </div>
+      </div>
+      <div class="product-grid" id="home-products"></div>
+    </div>
+  </section>
+<!-- 
+  <section class="section bg-secondary">
+    <div class="container">
+      <div class="split"> -->
+        <!-- <div class="split-img">
+          <img src="home2.png" alt="Ritual">
+        </div> -->
+
+        <!-- IMAGE REMOVE KARO -->
+<!-- <img src="soap.jpg" alt=""> -->
+
+<!-- AA VIDEO MUKO -->
+<!-- <video autoplay muted loop playsinline class="hero-video">
+    <source src="image2.mp4" type="video/mp4">
+</video>
+<source src="image2.mp4" type="video/mp4">
+        <div class="split-content">
+          <span class="label">The Philosophy</span>
+          <h2>Organic Precision,<br><em>Soulful Science.</em></h2>
+          <p>Every OlifePlus bar is hand-cured and clinically verified. We treat every ritual as a seamless act of
+            nourishment — frictionless, luminous, alive.</p>
+          <div class="benefits-grid">
+            <div class="benefit-item">
+              <div class="bi-icon">🌿</div>
+              <h4>100% Natural</h4>
+              <p>Plant-derived actives only.</p>
+            </div>
+            <div class="benefit-item">
+              <div class="bi-icon">✨</div>
+              <h4>Skin Brightening</h4>
+              <p>Visible radiance restored.</p>
+            </div>
+            <div class="benefit-item">
+              <div class="bi-icon">🛡️</div>
+              <h4>Chemical Free</h4>
+              <p>No parabens, no sulfates.</p>
+            </div>
+            <div class="benefit-item">
+              <div class="bi-icon">💧</div>
+              <h4>Deep Moisture</h4>
+              <p>All-day hydration.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <section class="section bg-secondary">
+  <div class="container">
+    
+    <div class="split">
+
+      <!-- LEFT SIDE VIDEO -->
+      <div class="split-img">
+        <video 
+class="hero-video"
+muted 
+loop 
+playsinline
+onmouseover="this.play()" 
+onmouseout="this.pause(); this.currentTime=0;"
+>
+    <source src="image2.mp4" type="video/mp4">
+</video>
+      </div>
+
+      <!-- RIGHT SIDE CONTENT -->
+      <div class="split-content">
+        <span class="label">The Philosophy</span>
+
+        <h2>
+          Organic Precision,<br>
+          <em>Soulful Science.</em>
+        </h2>
+
+        <p>
+          Every OlifePlus bar is hand-cured and clinically verified.
+          We treat every ritual as a seamless act of nourishment —
+          frictionless, luminous, alive.
+        </p>
+
+        <div class="benefits-grid">
+
+          <div class="benefit-item">
+            <div class="bi-icon">🌿</div>
+            <h4>100% Natural</h4>
+            <p>Plant-derived actives only.</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="bi-icon">✨</div>
+            <h4>Skin Brightening</h4>
+            <p>Visible radiance restored.</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="bi-icon">🛡️</div>
+            <h4>Chemical Free</h4>
+            <p>No parabens, no sulfates.</p>
+          </div>
+
+          <div class="benefit-item">
+            <div class="bi-icon">💧</div>
+            <h4>Deep Moisture</h4>
+            <p>All-day hydration.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+  <!-- ════════════════════════════════════════ FOOTER ═══ -->
+  <!-- ════════════════════════════════════════ FOOTER ═══ -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img
+              src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png"
+              alt="OlifePlus">
+          </div>
+          <p class="footer-desc">
+            OlifePlus brings you precision-crafted Ayurvedic skincare — pure, botanical, and built for radiant everyday
+            wellness.
+          </p>
+
+          <div class="footer-socials">
+            <a href="https://www.instagram.com/olifeplus?utm_source=qr&amp;igsh=cWQ0M2ZlcXhjNnVl" target="_blank"
+              title="Instagram" style="text-decoration:none;">
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="tel:+918780803334" title="Contact" style="text-decoration:none;">
+              <i class="fa-solid fa-phone"></i>
+            </a>
+            <a href="https://wa.me/918780803334" target="_blank" title="WhatsApp" style="text-decoration:none;">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="blog.html">Journal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Care</h4>
+          <ul>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="tel:+918780803334">+91 87808 03334</a></li>
+            <li><span>info@olifeplus.com</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 OlifePlus. Advance Ayurveda. All rights reserved.</p>
+        <a href="https://www.visionboostmarketing.com" target="_blank" style="text-decoration:none;color:inherit;">
+          <p style="letter-spacing:.2em;text-transform:uppercase">
+            Created By VisionBoost Marketing
+          </p>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    const user = JSON.parse(localStorage.getItem("olifeplusAccountData"));
+
+const loginBtn = document.querySelector(".btn-login");
+
+if (user && loginBtn) {
+  loginBtn.innerText = "My Account";
+  loginBtn.onclick = () => {
+    window.location.href = "my-account.html";
+  };
+}
+  </script>
+</body>
+
+</html>

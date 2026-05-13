@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account - OlifePlus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    :root {
+      --bg: #f9f9f6;
+      --fg: #0a2622;
+      --primary: #0a2622;
+      --secondary: #e8f2ec;
+      --accent: #b99470;
+      --border: #d5e1da;
+      --muted: rgba(10, 38, 34, .6);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--secondary), var(--bg));
+      color: var(--fg);
+      min-height: 100vh
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      background: rgba(249, 249, 246, .92);
+      border-bottom: 1px solid rgba(10, 38, 34, .08);
+      position: sticky;
+      top: 0
+    }
+
+    .topbar a {
+      text-decoration: none;
+      color: var(--fg)
+    }
+
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 20px 42px
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 24px
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 54px;
+      line-height: 1
+    }
+
+    .hero p {
+      color: var(--muted);
+      margin-top: 10px;
+      font-size: 15px
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      padding: 13px 18px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase
+    }
+
+    .btn-dark {
+      background: var(--primary);
+      color: #fff
+    }
+
+    .btn-light {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary)
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 22px
+    }
+
+    .card {
+      background: rgba(255, 255, 255, .82);
+      border: 1px solid rgba(10, 38, 34, .08);
+      padding: 24px;
+      box-shadow: 0 16px 32px rgba(10, 38, 34, .06)
+    }
+
+    .card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 34px;
+      margin-bottom: 16px
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 12px
+    }
+
+    .detail-item {
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      background: #fff
+    }
+
+    .label {
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 7px
+    }
+
+    .value {
+      font-size: 15px;
+      color: var(--fg);
+      word-break: break-word
+    }
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .history-list {
+      display: grid;
+      gap: 14px
+    }
+
+    .order-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      background: #fff
+    }
+
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .order-title {
+      font-weight: 600
+    }
+
+    .order-meta,
+    .order-items,
+    .empty-state p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7
+    }
+
+    .empty-state {
+      padding: 28px;
+      border: 1px dashed var(--border);
+      background: #fff;
+      text-align: center
+    }
+
+    .login-only {
+      display: none
+    }
+
+    .edit-form { display:grid; gap:12px; }
+    .form-row label { display:block; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:7px; }
+    .form-row input { width:100%; padding:13px 14px; border:1px solid var(--border); background:#fff; color:var(--fg); outline:none; font-size:15px; }
+    .form-row input:disabled { background:#f7f7f3; color:var(--muted); cursor:not-allowed; }
+    .save-msg { display:none; margin-top:12px; padding:12px 14px; font-size:14px; line-height:1.6; border:1px solid transparent; }
+    .save-msg.success { display:block; color:#1f5b4f; background:rgba(232,242,236,.65); border-color:rgba(10,38,34,.08); }
+    .save-msg.error { display:block; color:#b00020; background:rgba(176,0,32,.05); border-color:rgba(176,0,32,.12); }
+
+    
+    .actions a {text-decoration:none;}
+    .actions .btn {border-radius:14px; min-width:160px; font-weight:600; transition:.3s ease;}
+    .actions .btn:hover {transform:translateY(-2px);}
+    @media (max-width:600px){
+      .topbar{padding:14px 16px; flex-direction:column; gap:14px;}
+      .actions{width:100%;}
+      .actions a,.actions button{width:100%;}
+      .actions .btn{width:100%; min-width:100%;}
+      .hero h1{font-size:34px;}
+      .card{padding:18px;}
+      .wrap{padding:20px 14px 32px;}
+    }
+
+    @media (max-width:900px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .hero h1 {
+        font-size: 42px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <a href="index.html" class="brand"><img src="logo.png" alt="OlifePlus" style="height:56px;width:auto;display:block"></a>
+    <div class="actions">
+      <a href="index.html"><button class="btn btn-light">Back to Home</button></a>
+      <button class="btn btn-dark" id="logoutBtn" style="display:none">Logout</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="label">OlifePlus Account</div>
+        <h1 id="heroTitle">My Account</h1>
+        <p id="heroText">See your profile details and order history in one place.</p>
+      </div>
+    </div>
+
+    <div id="loggedOutView" class="card empty-state">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:38px;margin-bottom:8px;">Login Required</h2>
+      <p>You are not logged in. Please login first to see your account details and order history.</p>
+      <div class="actions" style="justify-content:center;margin-top:18px;">
+        <a href="login.html"><button class="btn btn-dark">Login</button></a>
+        <a href="signup.html"><button class="btn btn-light">Create Account</button></a>
+      </div>
+    </div>
+
+    <div id="loggedInView" class="login-only">
+      <div class="grid">
+        <section class="card">
+          <div class="actions" style="justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <h2 style="margin-bottom:0">Account Details</h2>
+            <button class="btn btn-light" id="editBtn" type="button">Edit Info</button>
+          </div>
+
+          <form id="accountForm" class="edit-form">
+            <div class="form-row">
+              <label for="editName">Full Name</label>
+              <input type="text" id="editName" disabled required>
+            </div>
+            <div class="form-row">
+              <label for="editEmail">Email</label>
+              <input type="email" id="editEmail" disabled>
+            </div>
+            <div class="form-row">
+              <label for="editPhone">Phone Number</label>
+              <input type="text" id="editPhone" disabled>
+            </div>
+            <div class="form-row">
+              <label for="editAddress">Address</label>
+              <input type="text" id="editAddress" disabled placeholder="Enter address">
+            </div>
+            <div class="detail-item" style="margin-top:4px">
+              <div class="label">Login ID</div>
+              <div class="value" id="accLogin">—</div>
+            </div>
+            <div class="actions" id="editActions" style="display:none;margin-top:8px;">
+              <button class="btn btn-dark" id="saveBtn" type="submit">Save Changes</button>
+              <button class="btn btn-light" id="cancelBtn" type="button">Cancel</button>
+            </div>
+            <div id="saveMsg" class="save-msg"></div>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Account History</h2>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="firebase-helpers.js"></script>
+
+  <script>
+    let activeUser = null;
+    let originalUser = null;
+
+    function readJson(key, fallback) {
+      try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+      catch (e) { return fallback; }
+    }
+
+    function getCurrentUser() {
+      return readJson('olifeplusCurrentUser', null) || readJson('olifeplusAccountData', null);
+    }
+
+    function isLoggedIn() {
+      return localStorage.getItem('olifeplusLoggedIn') === 'true' && !!getCurrentUser();
+    }
+
+    function getUserKey(user) {
+      return user ? String(user.userInput || user.email || user.phone || '').trim().toLowerCase() : '';
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '—';
+      const d = new Date(dateString);
+      return d.toLocaleString();
+    }
+
+    function setSaveMessage(text, type) {
+      const box = document.getElementById('saveMsg');
+      box.textContent = text;
+      box.className = 'save-msg ' + type;
+      box.style.display = 'block';
+    }
+
+    function setEditMode(enabled) {
+      ['editName', 'editEmail', 'editPhone', 'editAddress'].forEach(id => {
+        document.getElementById(id).disabled = !enabled;
+      });
+      document.getElementById('editActions').style.display = enabled ? 'flex' : 'none';
+      document.getElementById('editBtn').style.display = enabled ? 'none' : 'inline-block';
+      document.getElementById('saveMsg').style.display = 'none';
+    }
+
+    function userAddress(user) {
+      return user.addressDetails
+        ? [user.addressDetails.houseNumber, user.addressDetails.floor, user.addressDetails.building, user.addressDetails.societyName, user.addressDetails.landmark, user.addressDetails.area, user.addressDetails.city, user.addressDetails.state, user.addressDetails.pincode].filter(Boolean).join(', ')
+        : (user.address || '');
+    }
+
+    function fillAccountForm(user) {
+      document.getElementById('editName').value = user.name || '';
+      document.getElementById('editEmail').value = user.email || '';
+      document.getElementById('editPhone').value = user.phone || '';
+      document.getElementById('editAddress').value = userAddress(user) || '';
+      document.getElementById('accLogin').textContent = user.userInput || user.email || user.phone || '—';
+    }
+
+    function updateLocalUser(updatedUser, oldUser) {
+      const oldKey = getUserKey(oldUser || updatedUser);
+      const newKey = getUserKey(updatedUser);
+      let users = readJson('olifeplusUsers', []);
+      if (!Array.isArray(users)) users = [];
+
+      let replaced = false;
+      users = users.map(user => {
+        const key = getUserKey(user);
+        const match = key === oldKey || key === newKey || (oldUser && user.email === oldUser.email) || (oldUser && user.phone === oldUser.phone);
+        if (match) {
+          replaced = true;
+          return { ...user, ...updatedUser };
+        }
+        return user;
+      });
+
+      if (!replaced) users.push(updatedUser);
+
+      localStorage.setItem('olifeplusUsers', JSON.stringify(users));
+      localStorage.setItem('olifeplusCurrentUser', JSON.stringify(updatedUser));
+      localStorage.setItem('olifeplusAccountData', JSON.stringify(updatedUser));
+      localStorage.setItem('olifeplusSession', JSON.stringify({ userInput: updatedUser.userInput, timestamp: Date.now() }));
+    }
+
+    async function renderAccount() {
+      const loggedIn = isLoggedIn();
+      const user = getCurrentUser();
+      const loggedOutView = document.getElementById('loggedOutView');
+      const loggedInView = document.getElementById('loggedInView');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      if (!loggedIn || !user) {
+        loggedOutView.style.display = 'block';
+        loggedInView.style.display = 'none';
+        logoutBtn.style.display = 'none';
+        return;
+      }
+
+      activeUser = user;
+      originalUser = JSON.parse(JSON.stringify(user));
+
+      loggedOutView.style.display = 'none';
+      loggedInView.style.display = 'block';
+      logoutBtn.style.display = 'inline-block';
+
+      document.getElementById('heroTitle').textContent = 'Welcome, ' + (user.name || 'Customer');
+      document.getElementById('heroText').textContent = 'Your saved details and order history are shown below.';
+      fillAccountForm(user);
+      setEditMode(false);
+
+      const historyList = document.getElementById('historyList');
+      const userKey = getUserKey(user);
+      const orderHistory = readJson('olifeplusOrderHistory', []);
+      const legacyOrders = readJson('orders', []);
+      const finalOrder = readJson('olifeplusFinalOrder', null);
+      let allOrders = [];
+      if (Array.isArray(orderHistory)) allOrders = allOrders.concat(orderHistory);
+      if (Array.isArray(legacyOrders)) allOrders = allOrders.concat(legacyOrders);
+      if (finalOrder) allOrders.unshift(finalOrder);
+
+      allOrders = allOrders.filter(order => {
+        const possibleKeys = [
+          order.userKey, order.userEmail, order.userPhone,
+          order.email, order.phone, order.phoneNumber
+        ].map(v => String(v || '').trim().toLowerCase()).filter(Boolean);
+        return userKey && possibleKeys.includes(userKey);
+      });
+
+      const seen = new Set();
+      allOrders = allOrders.filter(order => {
+        const id = order.orderId || order.orderedAt || JSON.stringify(order);
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+
+      try {
+        if (window.OlifeFirebase && window.OlifeFirebase.getOrdersForUser) {
+          const firebaseOrders = await window.OlifeFirebase.getOrdersForUser(user);
+          if (firebaseOrders.length) allOrders = firebaseOrders.concat(allOrders);
+        }
+      } catch (error) {
+        console.error('Order history fetch error:', error);
+      }
+
+      allOrders.sort((a, b) => new Date(b.orderedAt || b.createdAt || 0) - new Date(a.orderedAt || a.createdAt || 0));
+
+      if (!allOrders.length) {
+        historyList.innerHTML = '<div class="empty-state"><p>No order history available yet.</p></div>';
+        return;
+      }
+
+      const showAllOrders = localStorage.getItem('olifeplusShowAllOrders') === 'true';
+      const displayOrders = showAllOrders ? allOrders : allOrders.slice(0, 3);
+
+      historyList.innerHTML = displayOrders.map(order => {
+        const itemSummary = order.items && Array.isArray(order.items)
+          ? order.items.map(item => `${item.name} × ${item.quantity}`).join(', ')
+          : 'Order details saved';
+        const locationParts = [order.houseNumber, order.floor, order.building, order.societyName, order.landmark, order.area, order.city, order.state, order.pincode].filter(Boolean).join(', ');
+
+        return `
+          <div class="order-card">
+            <div class="order-top">
+              <div>
+                <div class="order-title">${order.orderId || 'Order Saved'}</div>
+                <div class="order-meta">${formatDate(order.orderedAt)}</div>
+              </div>
+              <div class="order-meta">${order.paymentOption || 'Payment pending'}</div>
+            </div>
+            <div class="order-items"><strong>Items:</strong> ${itemSummary}</div>
+            <div class="order-meta"><strong>Customer:</strong> ${order.customerName || user.name || '—'}</div>
+            <div class="order-meta"><strong>Phone:</strong> ${order.phoneNumber || user.phone || '—'}</div>
+            <div class="order-meta"><strong>Address:</strong> ${locationParts || user.address || '—'}</div>
+            <div class="order-meta"><strong>Total:</strong> ₹${order.total || order.amount || '—'}</div>
+            <div class="order-meta"><strong>Status:</strong> ${order.status || 'Order placed'}</div>
+            <button class="btn outline" style="margin-top:14px" onclick="trackOrder('${order.orderId || ''}')">Track Order</button>
+          </div>
+        `;
+      }).join('');
+
+      if (allOrders.length > 3) {
+        historyList.innerHTML += `
+          <button class="btn btn-light" style="margin-top:6px;width:100%" onclick="toggleAllOrders()">
+            ${showAllOrders ? 'Show Latest 3 Orders' : 'View All Orders'}
+          </button>
+        `;
+      }
+    }
+
+    function toggleAllOrders() {
+      const current = localStorage.getItem('olifeplusShowAllOrders') === 'true';
+      localStorage.setItem('olifeplusShowAllOrders', current ? 'false' : 'true');
+      renderAccount();
+    }
+
+    function trackOrder(orderId) {
+      if (!orderId) {
+        alert('Order ID not found.');
+        return;
+      }
+      localStorage.setItem('olifeplusTrackOrderId', orderId);
+      window.location.href = 'track-order.html';
+    }
+
+    document.getElementById('editBtn').addEventListener('click', function () {
+      setEditMode(true);
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', function () {
+      fillAccountForm(originalUser || activeUser);
+      setEditMode(false);
+    });
+
+    document.getElementById('accountForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!activeUser) return;
+
+      const name = document.getElementById('editName').value.trim();
+      const email = document.getElementById('editEmail').value.trim().toLowerCase();
+      const phone = document.getElementById('editPhone').value.replace(/\s+/g, '').trim();
+      const address = document.getElementById('editAddress').value.trim();
+
+      if (!name || (!email && !phone)) {
+        setSaveMessage('Name and email/phone required chhe.', 'error');
+        return;
+      }
+
+      const updatedUser = {
+        ...activeUser,
+        name,
+        email,
+        phone,
+        address,
+        userInput: email || phone,
+        updatedAt: new Date().toISOString()
+      };
+
+      const oldUser = { ...activeUser };
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        if (window.OlifeFirebase && window.OlifeFirebase.updateUser) {
+          await window.OlifeFirebase.updateUser(oldUser, updatedUser);
+        }
+        updateLocalUser(updatedUser, oldUser);
+        activeUser = updatedUser;
+        originalUser = JSON.parse(JSON.stringify(updatedUser));
+        document.getElementById('heroTitle').textContent = 'Welcome, ' + (updatedUser.name || 'Customer');
+        fillAccountForm(updatedUser);
+        setEditMode(false);
+        setSaveMessage('Account info successfully database ma update thai gayi.', 'success');
+      } catch (error) {
+        console.error('Account update error:', error);
+        updateLocalUser(updatedUser, oldUser);
+        activeUser = updatedUser;
+        originalUser = JSON.parse(JSON.stringify(updatedUser));
+        fillAccountForm(updatedUser);
+        setEditMode(false);
+        setSaveMessage('Local save thai gayu, but Firebase database update failed. Internet/Firebase rule check karo.', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      localStorage.removeItem('olifeplusLoggedIn');
+      localStorage.removeItem('olifeplusSession');
+      localStorage.removeItem('olifeplusCurrentUser');
+      window.location.href = 'login.html';
+    });
+
+    renderAccount();
+  </script>
+</body>
+
+</html>
