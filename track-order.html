@@ -238,11 +238,7 @@
   <script src="firebase-helpers.js"></script>
   <script>
     const defaultSteps = ["Order Placed", "Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
-<<<<<<< HEAD
     const BACKEND_URL = "https://olife-backend.onrender.com";
-=======
-    const BACKEND_URL = window.BACKEND_URL || "http://127.0.0.1:5000";
->>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
 
     function readJson(key, fallback) {
       try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
@@ -519,7 +515,6 @@
         localStorage.setItem("olifeplusFinalOrder", JSON.stringify(updatedOrder));
       }
     }
-<<<<<<< HEAD
 async function cancelOrder() {
   if (!currentOrder) {
     alert("Please load order first");
@@ -582,88 +577,6 @@ async function cancelOrder() {
     alert("Cancel error: " + err.message);
   }
 }
-=======
-
-    async function cancelOrder() {
-      if (!currentOrder) {
-        alert("Please load order first");
-        return;
-      }
-
-      if ((currentOrder.status || "").toLowerCase().includes("delivered")) {
-        alert("Order already delivered. Cannot cancel.");
-        return;
-      }
-
-      const confirmCancel = confirm("Are you sure you want to cancel this order?");
-      if (!confirmCancel) return;
-
-      try {
-        document.getElementById("result").innerHTML = "Cancelling order in NimbusPost...";
-
-        // 🔥 GET AWB PROPERLY
-        const awb =
-          currentOrder.awb ||
-          currentOrder.awb_number ||
-          currentOrder.nimbusResponse?.awb ||
-          currentOrder.nimbusResponse?.awb_number ||
-          currentOrder.nimbusResponse?.data?.awb_number ||
-          "";
-
-        console.log("AWB FOUND:", awb);
-
-        let nimbusCancel = null;
-
-        if (awb) {
-          const response = await fetch(`${BACKEND_URL}/cancel-order`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              nimbusOrderId: currentOrder.nimbusOrderId
-            })
-          });
-
-          const text = await response.text(); // 🔥 FIX FOR INVALID JSON ERROR
-          console.log("RAW RESPONSE:", text);
-
-          try {
-            nimbusCancel = JSON.parse(text);
-          } catch {
-            nimbusCancel = { message: text };
-          }
-
-          console.log("Nimbus cancel response:", nimbusCancel);
-        } else {
-          alert("AWB not found. Cannot cancel on Nimbus.");
-        }
-
-        // 🔥 UPDATE LOCAL STATUS
-        currentOrder = {
-          ...currentOrder,
-          status: "Cancelled",
-          cancelledAt: new Date().toISOString(),
-          cancelResponse: nimbusCancel
-        };
-
-        updateOrderEverywhere(currentOrder);
-
-        document.getElementById("result").className = "order-card";
-        document.getElementById("result").innerHTML = `
-      <h2 style="color:red;">Order Cancelled</h2>
-      <div class="meta"><strong>Order ID:</strong> ${currentOrder.orderId}</div>
-      <div class="meta"><strong>AWB:</strong> ${awb || "Not Available"}</div>
-      <div class="meta"><strong>Nimbus Status:</strong> ${nimbusCancel?.message || "Request sent"}</div>
-    `;
-        console.log("Nimbus ID:", currentOrder.nimbusOrderId);
-      } catch (err) {
-        console.error(err);
-        alert("Cancel failed: " + err.message);
-        renderOrder(currentOrder);
-      }
-    }
->>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
     document.addEventListener("DOMContentLoaded", loadOrder);
   </script>
 </body>
