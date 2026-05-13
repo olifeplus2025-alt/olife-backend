@@ -1,24 +1,15 @@
-  {
-<<<<<<< HEAD
+{
   "name": "olife-backend",
-=======
-  "name": "web",
->>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-<<<<<<< HEAD
-  "type": "module"",
-=======
   "type": "commonjs",
->>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
