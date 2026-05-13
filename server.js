@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // const express = require("express");
 // const cors = require("cors");
 // require("dotenv").config();
@@ -156,10 +157,15 @@
 // app.listen(PORT, () => console.log("🚀 Server running on port " + PORT));
 
 const express = require("express");
+=======
+const express = require("express");
+const fetch = require("node-fetch");
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
+<<<<<<< HEAD
 
 app.use(express.json());
 app.use(cors());
@@ -181,6 +187,17 @@ function getAwb(data) {
 }
 
 // GET NIMBUS ORDER ID
+=======
+app.use(express.json());
+app.use(cors({ origin: "*" }));
+
+const PORT = process.env.PORT || 5000;
+let orders = [];
+
+function getAwb(data) {
+  return data?.awb_number || data?.awb || data?.data?.awb_number || data?.data?.awb || data?.data?.shipment?.awb_number || "";
+}
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
 function getNimbusOrderId(data) {
   return (
     data?.data?.order_id ||
@@ -190,10 +207,14 @@ function getNimbusOrderId(data) {
     ""
   );
 }
+<<<<<<< HEAD
 
 // =============================
 // CREATE SHIPMENT / ORDER
 // =============================
+=======
+// CREATE SHIPMENT / ORDER IN NIMBUSPOST
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
 app.post("/create-shipment", async (req, res) => {
   try {
     const order = req.body || {};
@@ -209,6 +230,7 @@ app.post("/create-shipment", async (req, res) => {
         pincode: String(order.pincode || ""),
         phone: String(order.phone || order.phoneNumber || "")
       },
+<<<<<<< HEAD
 
       order: {
         order_number: order.orderId || "ORD" + Date.now(),
@@ -224,18 +246,31 @@ app.post("/create-shipment", async (req, res) => {
 
         total: Number(order.total || 0),
 
+=======
+      order: {
+        order_number: order.orderId || "ORD" + Date.now(),
+        shipping_charges: Number(order.shipping || 0),
+        discount: Number(order.discount || 0),
+        cod_charges: Number(order.codCharge || 0),
+        payment_type: (order.paymentMethod || order.paymentType) === "COD" ? "cod" : "prepaid",
+        total: Number(order.total || 0),
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
         package_weight: Number(order.package_weight || 300),
         package_length: Number(order.package_length || 10),
         package_height: Number(order.package_height || 10),
         package_breadth: Number(order.package_breadth || 10)
       },
+<<<<<<< HEAD
 
+=======
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
       order_items: items.map((item, index) => ({
         name: item.name || "Product",
         qty: String(item.quantity || item.qty || 1),
         price: String(item.price || 0),
         sku: item.id || item.sku || "SKU" + (index + 1)
       })),
+<<<<<<< HEAD
 
       pickup_warehouse_id: process.env.PICKUP_WAREHOUSE_ID,
 
@@ -306,10 +341,45 @@ app.post("/create-shipment", async (req, res) => {
     );
 
     // add latest order
+=======
+      pickup_warehouse_id: process.env.PICKUP_WAREHOUSE_ID,
+      rto_warehouse_id: process.env.RTO_WAREHOUSE_ID || process.env.PICKUP_WAREHOUSE_ID
+    };
+
+    console.log("📦 Create Payload:", JSON.stringify(payload, null, 2));
+    console.log("API KEY FOUND:", process.env.NIMBUS_API_KEY ? "YES" : "NO");
+
+    const response = await fetch("https://ship.nimbuspost.com/api/shipments/create", {
+      method: "POST",
+      headers: {
+        "NP-API-KEY": process.env.NIMBUS_API_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    console.log("🚚 Nimbus Response:", data);
+
+    const awb = getAwb(data);
+    const nimbusOrderId = getNimbusOrderId(data); // 🔥 NEW
+    console.log("🔥 Nimbus Order ID:", nimbusOrderId);
+    const savedOrder = {
+      ...order,
+      awb,
+      nimbusOrderId, // 🔥 MOST IMPORTANT
+      nimbusResponse: data,
+      status: data.status ? "Order Placed" : (order.status || "Order Placed"),
+      shipmentStatus: data.status ? "Created" : "Failed",
+      createdAt: new Date().toISOString()
+    };
+    orders = orders.filter(o => String(o.orderId || "") !== String(savedOrder.orderId || ""));
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
     orders.unshift(savedOrder);
 
     res.status(response.status).json({
       success: data.status === true,
+<<<<<<< HEAD
 
       message:
         data.message || "Nimbus response received",
@@ -453,3 +523,50 @@ app.get("/test", (req, res) => {
 app.listen(PORT, () => {
   console.log("🚀 Server running on port " + PORT);
 });
+=======
+      message: data.message || "Nimbus response received",
+      awb,
+      nimbus: data,
+      order: savedOrder
+    });
+  } catch (err) {
+    console.error("❌ Create Error:", err.message);
+    res.status(500).json({ success: false, message: "Shipment create failed", error: err.message });
+  }
+});
+
+// CANCEL ORDER IN NIMBUSPOST
+app.post("/cancel-order", async (req, res) => {
+  const { nimbusOrderId } = req.body;
+
+  if (!nimbusOrderId) {
+    return res.json({
+      status: false,
+      message: "Nimbus order id missing"
+    });
+  }
+
+  const response = await fetch("https://api.nimbuspost.com/v1/cancel", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.NIMBUS_TOKEN}`
+    },
+    body: JSON.stringify({
+      order_id: nimbusOrderId
+    })
+  });
+
+  const data = await response.json();
+  res.json(data);
+});
+app.get("/orders", (req, res) => res.json(orders));
+app.get("/get-order/:id", (req, res) => {
+  const order = orders.find(o => String(o.orderId || "") === String(req.params.id) || String(o.awb || "") === String(req.params.id));
+  if (!order) return res.json({ success: false, message: "Order not found" });
+  res.json({ success: true, order });
+});
+app.get("/test", (req, res) => res.json({ success: true, message: "Server working" }));
+
+app.listen(PORT, () => console.log("🚀 Server running on port " + PORT));
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a

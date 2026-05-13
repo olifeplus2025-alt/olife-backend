@@ -2499,6 +2499,7 @@ footer {
   #mobile-menu a{font-size:28px;}
   #mobile-account-link{font-size:12px !important;padding:11px 20px;}
 }
+<<<<<<< HEAD
 
 
 /* Mobile Responsive Enhancements */
@@ -2822,3 +2823,5 @@ body[data-page="products"] .section:first-of-type{
     padding-top: 0 !important;
 }
 
+=======
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a

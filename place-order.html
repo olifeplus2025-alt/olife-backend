@@ -77,7 +77,11 @@
     <button id="btn" onclick="location.href='track-order.html'">Track Order</button>
   </div>
   <script>
+<<<<<<< HEAD
       const BACKEND_URL = "https://olife-backend.onrender.com";
+=======
+    const BACKEND_URL = window.BACKEND_URL || "http://127.0.0.1:5000";
+>>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
     const cart = JSON.parse(localStorage.getItem("olifeplusCart") || "[]");
     const checkout = JSON.parse(localStorage.getItem("olifeplusCheckoutDetails") || "{}");
     const user = JSON.parse(localStorage.getItem("olifeplusCurrentUser") || localStorage.getItem("olifeplusAccountData") || "null");
