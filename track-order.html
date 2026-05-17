@@ -313,42 +313,77 @@
 
     async function loadOrder() {
       const input = document.getElementById("orderIdInput");
-      const orderId = (input.value || localStorage.getItem("olifeplusTrackOrderId") || "").trim();
+
+      const orderId = (
+        input.value ||
+        localStorage.getItem("olifeplusTrackOrderId") ||
+        ""
+      ).trim();
+
       if (!orderId) {
-        document.getElementById("result").innerHTML = "Please enter Order ID.";
+        document.getElementById("result").innerHTML =
+          "Please enter Order ID.";
         return;
       }
+
       input.value = orderId;
+
       document.getElementById("result").className = "msg";
-      document.getElementById("result").innerHTML = "Checking latest status...";
+      document.getElementById("result").innerHTML =
+        "Checking latest status...";
 
       let order = null;
+
+      // 🔥 Firebase Order
       try {
         if (window.OlifeFirebase && window.OlifeFirebase.getOrderById) {
           order = await window.OlifeFirebase.getOrderById(orderId);
         }
-      } catch (e) { console.error(e); }
+      } catch (e) {
+        console.error("Firebase Error:", e);
+      }
 
-      if (!order) order = findLocalOrder(orderId);
-      renderOrder(order);
-      if (!order) order = findLocalOrder(orderId);
+      // 🔥 Local Backup
+      if (!order) {
+        order = findLocalOrder(orderId);
+      }
 
-      // 🔥 ADD THIS LINE// 🔥 LocalStorage mathi latest order lai
-      let localOrder = JSON.parse(localStorage.getItem("olifeplusFinalOrder") || "null");
+      // 🔥 Final LocalStorage Merge
+      const localOrder = JSON.parse(
+        localStorage.getItem("olifeplusFinalOrder") || "null"
+      );
 
-      // 🔥 Merge karo (important)
-      if (localOrder && localOrder.orderId === order.orderId) {
+      if (
+        localOrder &&
+        String(localOrder.orderId || "").trim() === orderId
+      ) {
         order = {
           ...order,
-          nimbusOrderId: localOrder.nimbusOrderId,
-          awb: localOrder.awb
+          ...localOrder,
+
+          // 🔥 Safe Nimbus Fields
+          nimbusOrderId:
+            localOrder.nimbusOrderId ||
+            order?.nimbusOrderId ||
+            "",
+
+          awb:
+            localOrder.awb ||
+            order?.awb ||
+            ""
         };
       }
 
+      // 🔥 Save globally
       currentOrder = order;
 
+      // 🔥 Render
       renderOrder(order);
+
+      // 🔥 Debug
+      console.log("LIVE ORDER:", currentOrder);
     }
+
     let currentOrder = null;
     function generateInvoice() {
       const { jsPDF } = window.jspdf;
@@ -515,68 +550,68 @@
         localStorage.setItem("olifeplusFinalOrder", JSON.stringify(updatedOrder));
       }
     }
-async function cancelOrder() {
-  if (!currentOrder) {
-    alert("Please load order first");
-    return;
-  }
+    async function cancelOrder() {
+      if (!currentOrder) {
+        alert("Please load order first");
+        return;
+      }
 
-  if (!currentOrder.nimbusOrderId) {
-    alert("Nimbus Order ID missing. Cannot cancel.");
-    return;
-  }
+      if (!currentOrder.nimbusOrderId) {
+        alert("Nimbus Order ID missing. Cannot cancel.");
+        return;
+      }
 
-  if ((currentOrder.status || "").toLowerCase().includes("delivered")) {
-    alert("Order already delivered. Cannot cancel.");
-    return;
-  }
+      if ((currentOrder.status || "").toLowerCase().includes("delivered")) {
+        alert("Order already delivered. Cannot cancel.");
+        return;
+      }
 
-  const confirmCancel = confirm("Are you sure you want to cancel this order?");
-  if (!confirmCancel) return;
+      const confirmCancel = confirm("Are you sure you want to cancel this order?");
+      if (!confirmCancel) return;
 
-  try {
-    document.getElementById("result").innerHTML = "Cancelling order...";
+      try {
+        document.getElementById("result").innerHTML = "Cancelling order...";
 
-    const response = await fetch(`${BACKEND_URL}/cancel-order`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        nimbusOrderId: currentOrder.nimbusOrderId
-      })
-    });
+        const response = await fetch(`${BACKEND_URL}/cancel-order`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            nimbusOrderId: currentOrder.nimbusOrderId
+          })
+        });
 
-    const data = await response.json();
-    console.log("Cancel Response:", data);
+        const data = await response.json();
+        console.log("Cancel Response:", data);
 
-    if (!data.success) {
-      alert("Cancel failed: " + (data.message || "Unknown error"));
-      return;
-    }
+        if (!data.success) {
+          alert("Cancel failed: " + (data.message || "Unknown error"));
+          return;
+        }
 
-    // 🔥 UPDATE LOCAL
-    currentOrder = {
-      ...currentOrder,
-      status: "Cancelled",
-      shipmentStatus: "Cancelled",
-      cancelledAt: new Date().toISOString()
-    };
+        // 🔥 UPDATE LOCAL
+        currentOrder = {
+          ...currentOrder,
+          status: "Cancelled",
+          shipmentStatus: "Cancelled",
+          cancelledAt: new Date().toISOString()
+        };
 
-    updateOrderEverywhere(currentOrder);
+        updateOrderEverywhere(currentOrder);
 
-    document.getElementById("result").className = "order-card";
-    document.getElementById("result").innerHTML = `
+        document.getElementById("result").className = "order-card";
+        document.getElementById("result").innerHTML = `
       <h2 style="color:red;">Order Cancelled ✅</h2>
       <div class="meta"><strong>Order ID:</strong> ${currentOrder.orderId}</div>
       <div class="meta"><strong>Status:</strong> Cancelled</div>
     `;
 
-  } catch (err) {
-    console.error(err);
-    alert("Cancel error: " + err.message);
-  }
-}
+      } catch (err) {
+        console.error(err);
+        alert("Cancel error: " + err.message);
+      }
+    }
     document.addEventListener("DOMContentLoaded", loadOrder);
   </script>
 </body>

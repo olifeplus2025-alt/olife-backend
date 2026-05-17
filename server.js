@@ -332,10 +332,11 @@ app.post("/create-shipment", async (req, res) => {
   }
 });
 
-// =============================
+
 // CANCEL ORDER
 // =============================
 app.post("/cancel-order", async (req, res) => {
+
   try {
 
     const { awb } = req.body;
@@ -347,8 +348,10 @@ app.post("/cancel-order", async (req, res) => {
       });
     }
 
+    console.log("🔥 Cancel AWB:", awb);
+
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/shipments/cancel",
+      "https://ship.nimbuspost.com/api/shipment/cancel",
       {
         method: "POST",
 
@@ -358,16 +361,19 @@ app.post("/cancel-order", async (req, res) => {
         },
 
         body: JSON.stringify({
-          awb: awb
+          awb_number: awb
         })
       }
     );
 
     const data = await response.json();
 
-    console.log("❌ Cancel Response:", data);
+    console.log(
+      "❌ Nimbus Cancel Response:",
+      JSON.stringify(data, null, 2)
+    );
 
-    // UPDATE LOCAL ORDER STATUS
+    // 🔥 UPDATE LOCAL ORDER
     orders = orders.map(order => {
 
       if (String(order.awb) === String(awb)) {
@@ -375,19 +381,19 @@ app.post("/cancel-order", async (req, res) => {
         return {
           ...order,
           status: "Cancelled",
-          shipmentStatus: "Cancelled"
+          shipmentStatus: "Cancelled",
+          cancelledAt: new Date().toISOString()
         };
+
       }
 
       return order;
+
     });
 
     res.json({
-      success: data.status === true,
-
-      message:
-        data.message || "Order cancel response",
-
+      success: true,
+      message: "Order cancelled successfully",
       data
     });
 
@@ -399,7 +405,9 @@ app.post("/cancel-order", async (req, res) => {
       success: false,
       message: err.message
     });
+
   }
+
 });
 
 // =============================
