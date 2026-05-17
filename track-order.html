@@ -572,21 +572,26 @@
       try {
         document.getElementById("result").innerHTML = "Cancelling order...";
 
-        const response = await fetch(`${BACKEND_URL}/cancel-order`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            nimbusOrderId: currentOrder.nimbusOrderId
-          })
-        });
+        const response = await fetch(
+          `${BACKEND_URL}/cancel-order`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              awb: currentOrder.awb
+            })
+          }
+        );
 
         const data = await response.json();
-        console.log("Cancel Response:", data);
 
+        console.log("🔥 Cancel Response:", data);
         if (!data.success) {
-          alert("Cancel failed: " + (data.message || "Unknown error"));
+          alert(data.message || "Cancel failed");
           return;
         }
 
