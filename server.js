@@ -282,7 +282,25 @@ res.json({
   order: savedOrder
 
 });
-    setTimeout(async () => {
+setTimeout(async () => {
+      const latestOrder = orders.find(
+        o =>
+          String(o.orderId) ===
+          String(order.orderId)
+      );
+      
+      if (
+        latestOrder &&
+        latestOrder.status === "Cancelled"
+      ) {
+      
+        console.log(
+          "❌ Shipment skipped because order cancelled"
+        );
+      
+        return;
+      
+      }
 
   try {
 
@@ -309,43 +327,43 @@ res.json({
       "🚚 Nimbus Response:",
       data
     );
-
+    
     const nimbusOrderId =
-      getNimbusOrderId(data);
-
+    getNimbusOrderId(data);
+    
     console.log(
       "🔥 Nimbus Order ID:",
       nimbusOrderId
     );
-
+    
     orders = orders.map(o => {
-
+      
       if (
         String(o.orderId) ===
         String(order.orderId)
       ) {
-
+        
         return {
           ...o,
-
+          
           nimbusOrderId,
-
+          
           nimbusResponse: data,
-
+          
           shipmentStatus:
-            data.status
-              ? "Created"
-              : "Failed"
+          data.status
+          ? "Created"
+          : "Failed"
         };
-
+        
       }
-
+      
       return o;
-
+      
     });
-
+    
   } catch (e) {
-
+    
     console.error(
       "❌ Delayed Shipment Error:",
       e
@@ -354,24 +372,6 @@ res.json({
   }
 
 }, 10000);
-const latestOrder = orders.find(
-  o =>
-    String(o.orderId) ===
-    String(order.orderId)
-);
-
-if (
-  latestOrder &&
-  latestOrder.status === "Cancelled"
-) {
-
-  console.log(
-    "❌ Shipment skipped because order cancelled"
-  );
-
-  return;
-
-}
    
   } catch (err) {
 
