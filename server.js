@@ -354,40 +354,25 @@ res.json({
   }
 
 }, 5000);
+const latestOrder = orders.find(
+  o =>
+    String(o.orderId) ===
+    String(order.orderId)
+);
 
-    const data = await response.json();
+if (
+  latestOrder &&
+  latestOrder.status === "Cancelled"
+) {
 
-    console.log("🚚 Nimbus Response:", data);
+  console.log(
+    "❌ Shipment skipped because order cancelled"
+  );
 
-    const nimbusOrderId = getNimbusOrderId(data);
+  return;
 
-    console.log("🔥 Nimbus Order ID:", nimbusOrderId);
-
-    
-
-    // remove duplicate order
-    orders = orders.filter(
-      o =>
-        String(o.orderId || "") !==
-        String(savedOrder.orderId || "")
-    );
-
-    // add latest order
-    orders.unshift(savedOrder);
-
-    res.status(response.status).json({
-      success: data.status === true,
-
-      message:
-        data.message || "Nimbus response received",
-
-      
-
-      nimbus: data,
-
-      order: savedOrder
-    });
-
+}
+   
   } catch (err) {
 
     console.error("❌ Create Error:", err.message);
