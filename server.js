@@ -255,26 +255,17 @@ app.post("/create-shipment", async (req, res) => {
       process.env.NIMBUS_API_KEY ? "YES" : "NO"
     );
 
-    const form = new FormData();
-
-    form.append(
-      "data",
-      JSON.stringify(payload)
-    );
-
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/orders/create",
+      "https://ship.nimbuspost.com/api/shipments/create",
       {
         method: "POST",
 
         headers: {
-          "NP-API-KEY":
-            process.env.NIMBUS_API_KEY,
-
-          ...form.getHeaders()
+          "NP-API-KEY": process.env.NIMBUS_API_KEY,
+          "Content-Type": "application/json"
         },
 
-        body: form
+        body: JSON.stringify(payload)
       }
     );
 
@@ -320,7 +311,7 @@ app.post("/create-shipment", async (req, res) => {
       message:
         data.message || "Nimbus response received",
 
-
+      
 
       nimbus: data,
 
@@ -467,17 +458,17 @@ app.get("/orders", (req, res) => {
 app.get("/get-order/:id", (req, res) => {
 
   const order = orders.find(
-    o =>
+  o =>
 
-      String(o.orderId || "") ===
-      String(req.params.id)
+    String(o.orderId || "") ===
+    String(req.params.id)
 
-      ||
+    ||
 
-      String(o.nimbusOrderId || "") ===
-      String(req.params.id)
+    String(o.nimbusOrderId || "") ===
+    String(req.params.id)
 
-  );
+);
 
   if (!order) {
     return res.json({
