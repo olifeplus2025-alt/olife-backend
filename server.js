@@ -352,7 +352,7 @@ app.post("/cancel-order", async (req, res) => {
     console.log("🔥 Cancel AWB:", awb);
 
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/shipment/cancel",
+      "https://ship.nimbuspost.com/api/orders/cancel",
       {
         method: "POST",
 
@@ -374,8 +374,27 @@ app.post("/cancel-order", async (req, res) => {
       JSON.stringify(data, null, 2)
     );
 
+    // UPDATE ORDER STATUS
+    orders = orders.map(order => {
+
+      if (String(order.awb) === String(awb)) {
+
+        return {
+          ...order,
+          status: "Cancelled",
+          shipmentStatus: "Cancelled",
+          cancelledAt: new Date().toISOString()
+        };
+
+      }
+
+      return order;
+
+    });
+
     return res.json({
       success: true,
+      message: "Order cancelled successfully",
       data
     });
 
@@ -391,7 +410,6 @@ app.post("/cancel-order", async (req, res) => {
   }
 
 });
-
 // =============================
 // GET ALL ORDERS
 // =============================
