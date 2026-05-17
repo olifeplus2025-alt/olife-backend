@@ -342,7 +342,7 @@ app.post("/create-shipment", async (req, res) => {
 
       }
 
-    }, 1800000);
+    }, 2000);
 
   } catch (err) {
 
