@@ -114,11 +114,12 @@
         const data = await res.json();
         console.log("Nimbus Response:", data);
         localStorage.setItem("olifeplusNimbusResponse", JSON.stringify(data));
-        if (data.success && data.awb) {
-          showSuccess(`Shipment created ✓ AWB: ${data.awb}`);
+        if (data.success && data.order) {
+          // showSuccess(`Shipment created ✓ AWB: ${data.awb}`);
+          showSuccess(`Shipment created ✓ Nimbus Order ID: ${data.order?.nimbusOrderId || "N/A"}`);
           return {
             ...order,
-            awb: data.awb,
+            // awb: data.awb,
             nimbusOrderId: data.order?.nimbusOrderId, // 🔥 ADD THIS
             nimbusResponse: data.nimbus || data,
             shipmentStatus: "Created"

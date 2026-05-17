@@ -171,16 +171,16 @@ const PORT = process.env.PORT || 5000;
 let orders = [];
 
 // GET AWB
-function getAwb(data) {
-  return (
-    data?.awb_number ||
-    data?.awb ||
-    data?.data?.awb_number ||
-    data?.data?.awb ||
-    data?.data?.shipment?.awb_number ||
-    ""
-  );
-}
+// function getAwb(data) {
+//   return (
+//     data?.awb_number ||
+//     data?.awb ||
+//     data?.data?.awb_number ||
+//     data?.data?.awb ||
+//     // data?.data?.shipment?.awb_number ||
+//     ""
+//   );
+// }
 
 // GET NIMBUS ORDER ID
 function getNimbusOrderId(data) {
@@ -273,17 +273,13 @@ app.post("/create-shipment", async (req, res) => {
 
     console.log("🚚 Nimbus Response:", data);
 
-    const awb = getAwb(data);
-
     const nimbusOrderId = getNimbusOrderId(data);
 
-    console.log("🔥 AWB:", awb);
     console.log("🔥 Nimbus Order ID:", nimbusOrderId);
 
     const savedOrder = {
       ...order,
 
-      awb,
       nimbusOrderId,
 
       nimbusResponse: data,
@@ -315,7 +311,7 @@ app.post("/create-shipment", async (req, res) => {
       message:
         data.message || "Nimbus response received",
 
-      awb,
+      
 
       nimbus: data,
 
@@ -352,7 +348,10 @@ app.post("/cancel-order", async (req, res) => {
 
     }
 
-    console.log("🔥 AUTO CANCEL AWB:", awb);
+    console.log(
+      "🔥 FINAL CANCEL ID:",
+      nimbusOrderId
+    );
 
     const form = new FormData();
 
@@ -380,23 +379,31 @@ app.post("/cancel-order", async (req, res) => {
     const data = await response.json();
 
     console.log(
-      "🔥 COURIER CANCEL RESPONSE:",
+      "🔥 FINAL NIMBUS RESPONSE:",
       JSON.stringify(data, null, 2)
     );
 
-    // LOCAL UPDATE
+    // UPDATE LOCAL ORDER
     orders = orders.map(order => {
 
       if (
+
         String(order.nimbusOrderId) ===
         String(nimbusOrderId)
+
       ) {
 
         return {
+
           ...order,
+
           status: "Cancelled",
+
           shipmentStatus: "Cancelled",
-          cancelledAt: new Date().toISOString()
+
+          cancelledAt:
+            new Date().toISOString()
+
         };
 
       }
@@ -406,19 +413,31 @@ app.post("/cancel-order", async (req, res) => {
     });
 
     return res.json({
-      success: data.status === true,
+
+      success:
+        data.status === true,
+
       message:
-        data.message || "Shipment cancelled",
+        data.message ||
+        "Order cancelled",
+
       data
+
     });
 
   } catch (err) {
 
-    console.error("❌ AUTO CANCEL ERROR:", err);
+    console.error(
+      "❌ FINAL ERROR:",
+      err
+    );
 
     return res.status(500).json({
+
       success: false,
+
       message: err.message
+
     });
 
   }
@@ -443,8 +462,7 @@ app.get("/get-order/:id", (req, res) => {
       String(o.orderId || "") ===
       String(req.params.id) ||
 
-      String(o.awb || "") ===
-      String(req.params.id)
+      
   );
 
   if (!order) {
