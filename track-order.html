@@ -582,7 +582,12 @@
             },
 
             body: JSON.stringify({
-              awb: currentOrder.awb
+
+              awb: currentOrder.awb,
+
+              nimbusOrderId:
+                currentOrder.nimbusOrderId
+
             })
           }
         );
@@ -590,10 +595,15 @@
         const data = await response.json();
 
         console.log("🔥 Cancel Response:", data);
+
         if (!data.success) {
+
           alert(data.message || "Cancel failed");
+
           return;
+
         }
+
 
         // 🔥 UPDATE LOCAL
         currentOrder = {

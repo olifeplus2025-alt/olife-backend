@@ -341,20 +341,26 @@ app.post("/cancel-order", async (req, res) => {
 
   try {
 
-    const { awb } = req.body;
+    const { awb, nimbusOrderId } = req.body;
 
-    if (!awb) {
+    if (!awb || !nimbusOrderId) {
+
       return res.json({
         success: false,
-        message: "AWB missing"
+        message: "AWB or Nimbus Order ID missing"
       });
+
     }
 
-    console.log("🔥 Cancel Shipment AWB:", awb);
+    console.log("🔥 CANCEL DATA:", {
+      awb,
+      nimbusOrderId
+    });
 
     const form = new FormData();
 
-    // 🔥 IMPORTANT
+    // 🔥 IMPORTANT FINAL FIELDS
+    form.append("id", String(nimbusOrderId));
     form.append("awb", String(awb));
 
     const response = await fetch(
@@ -374,7 +380,7 @@ app.post("/cancel-order", async (req, res) => {
     const data = await response.json();
 
     console.log(
-      "🔥 Nimbus Shipment Cancel Response:",
+      "🔥 FINAL CANCEL RESPONSE:",
       JSON.stringify(data, null, 2)
     );
 
@@ -382,8 +388,7 @@ app.post("/cancel-order", async (req, res) => {
     orders = orders.map(order => {
 
       if (
-        String(order.awb) ===
-        String(awb)
+        String(order.awb) === String(awb)
       ) {
 
         return {
@@ -408,7 +413,7 @@ app.post("/cancel-order", async (req, res) => {
 
   } catch (err) {
 
-    console.error("❌ CANCEL ERROR:", err);
+    console.error("❌ FINAL CANCEL ERROR:", err);
 
     return res.status(500).json({
       success: false,
