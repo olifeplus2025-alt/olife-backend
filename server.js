@@ -158,6 +158,7 @@
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
+const FormData = require("form-data");
 require("dotenv").config();
 
 const app = express();
@@ -349,7 +350,18 @@ app.post("/cancel-order", async (req, res) => {
       });
     }
 
-    console.log("🔥 Cancel Nimbus Order:", nimbusOrderId);
+    console.log(
+      "🔥 Cancel Nimbus Order:",
+      nimbusOrderId
+    );
+
+    // 🔥 REAL MULTIPART FORM DATA
+    const form = new FormData();
+
+    form.append(
+      "order_id",
+      String(nimbusOrderId)
+    );
 
     const response = await fetch(
       "https://ship.nimbuspost.com/api/orders/cancel",
@@ -358,12 +370,10 @@ app.post("/cancel-order", async (req, res) => {
 
         headers: {
           "NP-API-KEY": process.env.NIMBUS_API_KEY,
-          "Content-Type": "application/json"
+          ...form.getHeaders()
         },
 
-        body: JSON.stringify({
-          order_id: nimbusOrderId
-        })
+        body: form
       }
     );
 
@@ -374,7 +384,7 @@ app.post("/cancel-order", async (req, res) => {
       JSON.stringify(data, null, 2)
     );
 
-    // 🔥 UPDATE LOCAL ORDER
+    // 🔥 UPDATE LOCAL ORDERS
     orders = orders.map(order => {
 
       if (
