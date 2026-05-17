@@ -255,19 +255,105 @@ app.post("/create-shipment", async (req, res) => {
       process.env.NIMBUS_API_KEY ? "YES" : "NO"
     );
 
+// ✅ STEP 3 START
+const savedOrder = {
+
+  ...order,
+
+  status: "Order Placed",
+
+  shipmentStatus:
+    "Processing",
+
+  createdAt:
+    new Date().toISOString()
+
+};
+
+orders.unshift(savedOrder);
+
+res.json({
+
+  success: true,
+
+  message:
+    "Order placed successfully",
+
+  order: savedOrder
+
+});
+    setTimeout(async () => {
+
+  try {
+
     const response = await fetch(
       "https://ship.nimbuspost.com/api/shipments/create",
       {
         method: "POST",
 
         headers: {
-          "NP-API-KEY": process.env.NIMBUS_API_KEY,
-          "Content-Type": "application/json"
+          "NP-API-KEY":
+            process.env.NIMBUS_API_KEY,
+
+          "Content-Type":
+            "application/json"
         },
 
         body: JSON.stringify(payload)
       }
     );
+
+    const data = await response.json();
+
+    console.log(
+      "🚚 Nimbus Response:",
+      data
+    );
+
+    const nimbusOrderId =
+      getNimbusOrderId(data);
+
+    console.log(
+      "🔥 Nimbus Order ID:",
+      nimbusOrderId
+    );
+
+    orders = orders.map(o => {
+
+      if (
+        String(o.orderId) ===
+        String(order.orderId)
+      ) {
+
+        return {
+          ...o,
+
+          nimbusOrderId,
+
+          nimbusResponse: data,
+
+          shipmentStatus:
+            data.status
+              ? "Created"
+              : "Failed"
+        };
+
+      }
+
+      return o;
+
+    });
+
+  } catch (e) {
+
+    console.error(
+      "❌ Delayed Shipment Error:",
+      e
+    );
+
+  }
+
+}, 30000);
 
     const data = await response.json();
 
@@ -361,7 +447,7 @@ app.post("/cancel-order", async (req, res) => {
     );
 
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/shipments/cancel",
+      "https://ship.nimbuspost.com/api/orders/cancel",
       {
         method: "POST",
 
