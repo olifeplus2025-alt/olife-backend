@@ -363,23 +363,7 @@ res.json({
 
     console.log("🔥 Nimbus Order ID:", nimbusOrderId);
 
-    const savedOrder = {
-      ...order,
-
-      nimbusOrderId,
-
-      nimbusResponse: data,
-
-      status: data.status
-        ? "Order Placed"
-        : order.status || "Order Placed",
-
-      shipmentStatus: data.status
-        ? "Created"
-        : "Failed",
-
-      createdAt: new Date().toISOString()
-    };
+    
 
     // remove duplicate order
     orders = orders.filter(
