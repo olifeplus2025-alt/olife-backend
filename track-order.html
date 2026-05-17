@@ -558,17 +558,17 @@
 
       if (!currentOrder.nimbusOrderId) {
 
-  // shipment not created yet
+        // shipment not created yet
 
-  currentOrder.status = "Cancelled";
+        currentOrder.status = "Cancelled";
 
-  currentOrder.shipmentStatus =
-    "Cancelled";
+        currentOrder.shipmentStatus =
+          "Cancelled";
 
-  updateOrderEverywhere(currentOrder);
+        updateOrderEverywhere(currentOrder);
 
-  document.getElementById("result")
-    .innerHTML = `
+        document.getElementById("result")
+          .innerHTML = `
 
       <h2 style="color:red;">
         Order Cancelled Successfully ✅
@@ -576,9 +576,9 @@
 
     `;
 
-  return;
+        return;
 
-}
+      }
 
       if ((currentOrder.status || "").toLowerCase().includes("delivered")) {
         alert("Order already delivered. Cannot cancel.");
@@ -602,6 +602,8 @@
 
             body: JSON.stringify({
 
+              orderId:
+                currentOrder.orderId,
 
               nimbusOrderId:
                 currentOrder.nimbusOrderId

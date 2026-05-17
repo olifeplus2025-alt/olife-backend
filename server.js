@@ -393,15 +393,44 @@ app.post("/cancel-order", async (req, res) => {
   try {
 
     const { nimbusOrderId } = req.body;
+if (!nimbusOrderId) {
 
-    if (!nimbusOrderId) {
+  orders = orders.map(order => {
 
-      return res.json({
-        success: false,
-        message: "Nimbus Order ID missing"
-      });
+    if (
+      String(order.orderId) ===
+      String(req.body.orderId)
+    ) {
+
+      return {
+
+        ...order,
+
+        status: "Cancelled",
+
+        shipmentStatus: "Cancelled",
+
+        cancelledAt:
+          new Date().toISOString()
+
+      };
 
     }
+
+    return order;
+
+  });
+
+  return res.json({
+
+    success: true,
+
+    message:
+      "Order cancelled before shipment creation"
+
+  });
+
+}
 
     console.log(
       "🔥 FINAL CANCEL ID:",
