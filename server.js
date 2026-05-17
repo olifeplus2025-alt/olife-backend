@@ -361,7 +361,7 @@ app.post("/cancel-order", async (req, res) => {
     );
 
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/orders/cancel",
+      "https://ship.nimbuspost.com/api/shipments/cancel",
       {
         method: "POST",
 
