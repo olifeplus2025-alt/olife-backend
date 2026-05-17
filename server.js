@@ -388,8 +388,8 @@ app.post("/cancel-order", async (req, res) => {
     orders = orders.map(order => {
 
       if (
-        String(order.awb) ===
-        String(awb)
+        String(order.nimbusOrderId) ===
+        String(nimbusOrderId)
       ) {
 
         return {
