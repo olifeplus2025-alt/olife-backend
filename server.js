@@ -353,7 +353,7 @@ res.json({
 
   }
 
-}, 30000);
+}, 5000);
 
     const data = await response.json();
 
