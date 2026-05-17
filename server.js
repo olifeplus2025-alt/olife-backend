@@ -369,39 +369,20 @@ app.post("/cancel-order", async (req, res) => {
     const data = await response.json();
 
     console.log(
-      "❌ Nimbus Cancel Response:",
+      "🔥 Nimbus Cancel Response:",
       JSON.stringify(data, null, 2)
     );
 
-    // 🔥 UPDATE LOCAL ORDER
-    orders = orders.map(order => {
-
-      if (String(order.awb) === String(awb)) {
-
-        return {
-          ...order,
-          status: "Cancelled",
-          shipmentStatus: "Cancelled",
-          cancelledAt: new Date().toISOString()
-        };
-
-      }
-
-      return order;
-
-    });
-
-    res.json({
+    return res.json({
       success: true,
-      message: "Order cancelled successfully",
       data
     });
 
   } catch (err) {
 
-    console.error("❌ Cancel Error:", err.message);
+    console.error("❌ CANCEL ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message
     });
