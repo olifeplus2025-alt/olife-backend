@@ -256,7 +256,7 @@ app.post("/create-shipment", async (req, res) => {
     );
 
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/shipments/create",
+      "https://ship.nimbuspost.com/api/orders/create",
       {
         method: "POST",
 
@@ -458,12 +458,17 @@ app.get("/orders", (req, res) => {
 app.get("/get-order/:id", (req, res) => {
 
   const order = orders.find(
-    o =>
-      String(o.orderId || "") ===
-      String(req.params.id)
+  o =>
 
-      
-  );
+    String(o.orderId || "") ===
+    String(req.params.id)
+
+    ||
+
+    String(o.nimbusOrderId || "") ===
+    String(req.params.id)
+
+);
 
   if (!order) {
     return res.json({
