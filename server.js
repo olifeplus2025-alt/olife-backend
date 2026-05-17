@@ -356,10 +356,10 @@ app.post("/cancel-order", async (req, res) => {
 
     const form = new FormData();
 
-    form.append("awb", String(awb));
+    form.append("id", String(nimbusOrderId));
 
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/courier/cancel",
+      "https://ship.nimbuspost.com/api/orders/cancel",
       {
         method: "POST",
 
