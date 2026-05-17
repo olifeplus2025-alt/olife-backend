@@ -359,7 +359,7 @@ app.post("/cancel-order", async (req, res) => {
     const form = new FormData();
 
     form.append(
-      "order_id",
+      "id",
       String(nimbusOrderId)
     );
 
@@ -441,10 +441,10 @@ app.get("/get-order/:id", (req, res) => {
   const order = orders.find(
     o =>
       String(o.orderId || "") ===
-        String(req.params.id) ||
+      String(req.params.id) ||
 
       String(o.awb || "") ===
-        String(req.params.id)
+      String(req.params.id)
   );
 
   if (!order) {
