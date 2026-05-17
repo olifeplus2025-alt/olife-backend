@@ -341,13 +341,13 @@ app.post("/cancel-order", async (req, res) => {
 
   try {
 
-    const { awb } = req.body;
+    const { nimbusOrderId } = req.body;
 
-    if (!awb) {
+    if (!nimbusOrderId) {
 
       return res.json({
         success: false,
-        message: "AWB missing"
+        message: "Nimbus Order ID missing"
       });
 
     }
@@ -356,7 +356,7 @@ app.post("/cancel-order", async (req, res) => {
 
     const form = new FormData();
 
-     form.append(
+    form.append(
       "id",
       String(nimbusOrderId)
     );
