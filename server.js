@@ -341,30 +341,31 @@ app.post("/cancel-order", async (req, res) => {
 
   try {
 
-    const { awb, nimbusOrderId } = req.body;
+    const { nimbusOrderId } = req.body;
 
-    if (!awb || !nimbusOrderId) {
+    if (!nimbusOrderId) {
 
       return res.json({
         success: false,
-        message: "AWB or Nimbus Order ID missing"
+        message: "Nimbus Order ID missing"
       });
 
     }
 
-    console.log("🔥 CANCEL DATA:", {
-      awb,
+    console.log(
+      "🔥 FINAL CANCEL ID:",
       nimbusOrderId
-    });
+    );
 
     const form = new FormData();
 
-    // 🔥 IMPORTANT FINAL FIELDS
-    form.append("id", String(nimbusOrderId));
-    form.append("awb", String(awb));
+    form.append(
+      "id",
+      String(nimbusOrderId)
+    );
 
     const response = await fetch(
-      "https://ship.nimbuspost.com/api/shipments/cancel",
+      "https://ship.nimbuspost.com/api/orders/cancel",
       {
         method: "POST",
 
@@ -380,15 +381,16 @@ app.post("/cancel-order", async (req, res) => {
     const data = await response.json();
 
     console.log(
-      "🔥 FINAL CANCEL RESPONSE:",
+      "🔥 FINAL NIMBUS RESPONSE:",
       JSON.stringify(data, null, 2)
     );
 
-    // 🔥 UPDATE LOCAL STATUS
+    // UPDATE LOCAL STATUS
     orders = orders.map(order => {
 
       if (
-        String(order.awb) === String(awb)
+        String(order.nimbusOrderId) ===
+        String(nimbusOrderId)
       ) {
 
         return {
@@ -407,13 +409,13 @@ app.post("/cancel-order", async (req, res) => {
     return res.json({
       success: data.status === true,
       message:
-        data.message || "Shipment cancelled",
+        data.message || "Order cancelled",
       data
     });
 
   } catch (err) {
 
-    console.error("❌ FINAL CANCEL ERROR:", err);
+    console.error("❌ FINAL ERROR:", err);
 
     return res.status(500).json({
       success: false,
