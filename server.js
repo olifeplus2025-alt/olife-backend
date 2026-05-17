@@ -284,9 +284,9 @@ app.post("/create-shipment", async (req, res) => {
         const data =
           await response.json();
 
-      console.log(
-  "🚚 Nimbus Response:",
-  data
+    console.log(
+  "🚚 FULL NIMBUS RESPONSE:",
+  JSON.stringify(data, null, 2)
 );
 
 const nimbusOrderId =
@@ -294,6 +294,8 @@ const nimbusOrderId =
   data?.data?.order_id ||
 
   data?.order_id ||
+
+  data?.data?.shipment_id ||
 
   "";
 
@@ -306,16 +308,15 @@ const awb =
   "";
 
 console.log(
-  "🔥 Nimbus Order ID:",
+  "🔥 SAVED NIMBUS ID:",
   nimbusOrderId
 );
 
 console.log(
-  "🔥 AWB:",
+  "🔥 SAVED AWB:",
   awb
 );
-
-        orders = orders.map(o => {
+orders = orders.map(o => {
 
   if (
     String(o.orderId) ===
@@ -326,11 +327,14 @@ console.log(
 
       ...o,
 
-      nimbusOrderId,
+      nimbusOrderId:
+        nimbusOrderId,
 
-      awb,
+      awb:
+        awb,
 
-      nimbusResponse: data,
+      nimbusResponse:
+        data,
 
       status:
         "Order Placed",
