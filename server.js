@@ -356,7 +356,7 @@ app.post("/cancel-order", async (req, res) => {
 
     const form = new FormData();
 
-    form.append("id", String(nimbusOrderId));
+    form.append("awb", String(awb));
 
     const response = await fetch(
       "https://ship.nimbuspost.com/api/orders/cancel",
@@ -364,8 +364,8 @@ app.post("/cancel-order", async (req, res) => {
         method: "POST",
 
         headers: {
-          Authorization:
-            `Bearer ${process.env.NIMBUS_API_KEY}`,
+          "NP-API-KEY":
+            process.env.NIMBUS_API_KEY,
 
           ...form.getHeaders()
         },
