@@ -582,7 +582,12 @@
             },
 
             body: JSON.stringify({
-              awb: currentOrder.awb
+
+              awb: currentOrder.awb,
+
+              nimbusOrderId:
+                currentOrder.nimbusOrderId
+
             })
           }
         );
