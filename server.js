@@ -308,25 +308,30 @@ app.post("/create-shipment", async (req, res) => {
 
           ) {
 
-            return {
+          return {
 
-              ...o,
+  ...o,
 
-              nimbusOrderId,
+  nimbusOrderId,
 
-              nimbusResponse:
-                data,
+  awb:
+    data?.data?.awb_number ||
 
-              status:
-                "Order Placed",
+    data?.awb_number ||
 
-              shipmentStatus:
-                data.status
-                  ? "Created"
-                  : "Failed"
+    "",
 
-            };
+  nimbusResponse: data,
 
+  status:
+    "Order Placed",
+
+  shipmentStatus:
+    data.status
+      ? "Created"
+      : "Failed"
+
+};
           }
 
           return o;
@@ -442,15 +447,12 @@ app.post("/cancel-order", async (req, res) => {
     const form =
       new FormData();
 
-    form.append(
-      "id",
-      String(nimbusOrderId)
-    );
+   form.append("awb", String(latestOrder.awb));
 
     const response =
       await fetch(
 
-        "https://ship.nimbuspost.com/api/orders/cancel",
+        "https://ship.nimbuspost.com/api/shipment/cancel",
 
         {
 
