@@ -460,7 +460,7 @@ app.get("/get-order/:id", (req, res) => {
   const order = orders.find(
     o =>
       String(o.orderId || "") ===
-      String(req.params.id) ||
+      String(req.params.id)
 
       
   );
