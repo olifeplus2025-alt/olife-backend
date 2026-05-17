@@ -364,7 +364,9 @@ app.post("/cancel-order", async (req, res) => {
         method: "POST",
 
         headers: {
-          "NP-API-KEY": process.env.NIMBUS_API_KEY,
+          Authorization:
+            `Bearer ${process.env.NIMBUS_API_KEY}`,
+
           ...form.getHeaders()
         },
 
