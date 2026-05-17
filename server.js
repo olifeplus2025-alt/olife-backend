@@ -284,59 +284,67 @@ app.post("/create-shipment", async (req, res) => {
         const data =
           await response.json();
 
-        console.log(
-          "🚚 Nimbus Response:",
-          data
-        );
+      console.log(
+  "🚚 Nimbus Response:",
+  data
+);
 
-        const nimbusOrderId =
-          getNimbusOrderId(data);
+const nimbusOrderId =
 
-        console.log(
-          "🔥 Nimbus Order ID:",
-          nimbusOrderId
-        );
+  data?.data?.order_id ||
 
-        // UPDATE ORDER
+  data?.order_id ||
+
+  "";
+
+const awb =
+
+  data?.data?.awb_number ||
+
+  data?.awb_number ||
+
+  "";
+
+console.log(
+  "🔥 Nimbus Order ID:",
+  nimbusOrderId
+);
+
+console.log(
+  "🔥 AWB:",
+  awb
+);
+
         orders = orders.map(o => {
 
-          if (
+  if (
+    String(o.orderId) ===
+    String(order.orderId)
+  ) {
 
-            String(o.orderId) ===
+    return {
 
-            String(order.orderId)
+      ...o,
 
-          ) {
+      nimbusOrderId,
 
-          return {
+      awb,
 
-  ...o,
+      nimbusResponse: data,
 
-  nimbusOrderId,
+      status:
+        "Order Placed",
 
-  awb:
-    data?.data?.awb_number ||
+      shipmentStatus:
+        "Created"
 
-    data?.awb_number ||
+    };
 
-    "",
+  }
 
-  nimbusResponse: data,
+  return o;
 
-  status:
-    "Order Placed",
-
-  shipmentStatus:
-    data.status
-      ? "Created"
-      : "Failed"
-
-};
-          }
-
-          return o;
-
-        });
+});
 
       } catch (e) {
 
