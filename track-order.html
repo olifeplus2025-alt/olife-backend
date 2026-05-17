@@ -557,9 +557,28 @@
       }
 
       if (!currentOrder.nimbusOrderId) {
-        alert("Nimbus Order ID missing. Cannot cancel.");
-        return;
-      }
+
+  // shipment not created yet
+
+  currentOrder.status = "Cancelled";
+
+  currentOrder.shipmentStatus =
+    "Cancelled";
+
+  updateOrderEverywhere(currentOrder);
+
+  document.getElementById("result")
+    .innerHTML = `
+
+      <h2 style="color:red;">
+        Order Cancelled Successfully ✅
+      </h2>
+
+    `;
+
+  return;
+
+}
 
       if ((currentOrder.status || "").toLowerCase().includes("delivered")) {
         alert("Order already delivered. Cannot cancel.");
