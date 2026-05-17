@@ -255,66 +255,14 @@ app.post("/create-shipment", async (req, res) => {
       process.env.NIMBUS_API_KEY ? "YES" : "NO"
     );
 
-// ✅ STEP 3 START
-const savedOrder = {
-
-  ...order,
-
-  status: "Order Placed",
-
-  shipmentStatus:
-    "Processing",
-
-  createdAt:
-    new Date().toISOString()
-
-};
-
-orders.unshift(savedOrder);
-
-res.json({
-
-  success: true,
-
-  message:
-    "Order placed successfully",
-
-  order: savedOrder
-
-});
-setTimeout(async () => {
-      const latestOrder = orders.find(
-        o =>
-          String(o.orderId) ===
-          String(order.orderId)
-      );
-      
-      if (
-        latestOrder &&
-        latestOrder.status === "Cancelled"
-      ) {
-      
-        console.log(
-          "❌ Shipment skipped because order cancelled"
-        );
-      
-        return;
-      
-      }
-
-  try {
-
     const response = await fetch(
       "https://ship.nimbuspost.com/api/shipments/create",
       {
         method: "POST",
 
         headers: {
-          "NP-API-KEY":
-            process.env.NIMBUS_API_KEY,
-
-          "Content-Type":
-            "application/json"
+          "NP-API-KEY": process.env.NIMBUS_API_KEY,
+          "Content-Type": "application/json"
         },
 
         body: JSON.stringify(payload)
@@ -323,56 +271,53 @@ setTimeout(async () => {
 
     const data = await response.json();
 
-    console.log(
-      "🚚 Nimbus Response:",
-      data
+    console.log("🚚 Nimbus Response:", data);
+
+    const nimbusOrderId = getNimbusOrderId(data);
+
+    console.log("🔥 Nimbus Order ID:", nimbusOrderId);
+
+    const savedOrder = {
+      ...order,
+
+      nimbusOrderId,
+
+      nimbusResponse: data,
+
+      status: data.status
+        ? "Order Placed"
+        : order.status || "Order Placed",
+
+      shipmentStatus: data.status
+        ? "Created"
+        : "Failed",
+
+      createdAt: new Date().toISOString()
+    };
+
+    // remove duplicate order
+    orders = orders.filter(
+      o =>
+        String(o.orderId || "") !==
+        String(savedOrder.orderId || "")
     );
-    
-    const nimbusOrderId =
-    getNimbusOrderId(data);
-    
-    console.log(
-      "🔥 Nimbus Order ID:",
-      nimbusOrderId
-    );
-    
-    orders = orders.map(o => {
+
+    // add latest order
+    orders.unshift(savedOrder);
+
+    res.status(response.status).json({
+      success: data.status === true,
+
+      message:
+        data.message || "Nimbus response received",
+
       
-      if (
-        String(o.orderId) ===
-        String(order.orderId)
-      ) {
-        
-        return {
-          ...o,
-          
-          nimbusOrderId,
-          
-          nimbusResponse: data,
-          
-          shipmentStatus:
-          data.status
-          ? "Created"
-          : "Failed"
-        };
-        
-      }
-      
-      return o;
-      
+
+      nimbus: data,
+
+      order: savedOrder
     });
-    
-  } catch (e) {
-    
-    console.error(
-      "❌ Delayed Shipment Error:",
-      e
-    );
 
-  }
-
-}, 10000);
-   
   } catch (err) {
 
     console.error("❌ Create Error:", err.message);
@@ -393,44 +338,15 @@ app.post("/cancel-order", async (req, res) => {
   try {
 
     const { nimbusOrderId } = req.body;
-if (!nimbusOrderId) {
 
-  orders = orders.map(order => {
+    if (!nimbusOrderId) {
 
-    if (
-      String(order.orderId) ===
-      String(req.body.orderId)
-    ) {
-
-      return {
-
-        ...order,
-
-        status: "Cancelled",
-
-        shipmentStatus: "Cancelled",
-
-        cancelledAt:
-          new Date().toISOString()
-
-      };
+      return res.json({
+        success: false,
+        message: "Nimbus Order ID missing"
+      });
 
     }
-
-    return order;
-
-  });
-
-  return res.json({
-
-    success: true,
-
-    message:
-      "Order cancelled before shipment creation"
-
-  });
-
-}
 
     console.log(
       "🔥 FINAL CANCEL ID:",
