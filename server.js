@@ -1,7 +1,10 @@
+
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
 const FormData = require("form-data");
+const nodemailer = require("nodemailer");
+
 
 require("dotenv").config();
 
@@ -15,40 +18,70 @@ const PORT = process.env.PORT || 5000;
 let orders = [];
 
 // ======================================
-// GET NIMBUS ORDER ID
+// EMAIL SETUP
 // ======================================
-function getNimbusOrderId(data) {
 
-  return (
+const transporter = nodemailer.createTransport({
 
-    data?.data?.order_id ||
+  service: "gmail",
 
-    data?.order_id ||
+  auth: {
 
-    data?.data?.shipment_id ||
+    user: process.env.EMAIL_USER,
 
-    data?.shipment_id ||
+    pass: process.env.EMAIL_PASS
 
-    ""
+  }
 
-  );
+});
+
+// ======================================
+// SEND EMAIL
+// ======================================
+
+async function sendEmail(to, subject, html) {
+
+  try {
+
+    await transporter.sendMail({
+
+      from: process.env.EMAIL_USER,
+
+      to,
+
+      subject,
+
+      html
+
+    });
+
+    console.log("✅ Email Sent");
+
+  } catch (err) {
+
+    console.log("❌ Email Error:", err.message);
+
+  }
 
 }
 
 // ======================================
 // CREATE ORDER
 // ======================================
+
 app.post("/create-shipment", async (req, res) => {
 
   try {
 
-    const order =
-      req.body || {};
+    const order = req.body || {};
 
-    const items =
-      Array.isArray(order.items)
-        ? order.items
-        : [];
+    const items = Array.isArray(order.items)
+      ? order.items
+      : [];
+
+    // ======================================
+    // NIMBUS PAYLOAD
+    // ======================================
 
     const payload = {
 
@@ -163,10 +196,6 @@ app.post("/create-shipment", async (req, res) => {
 
     };
 
-    console.log(
-      "📦 Order Saved:"
-    );
-
     // ======================================
     // SAVE ORDER ONLY
     // ======================================
@@ -181,12 +210,21 @@ app.post("/create-shipment", async (req, res) => {
       shipmentStatus:
         "Pending",
 
+      nimbusOrderId: "",
+
+      awb: "",
+
       createdAt:
-        new Date().toISOString()
+        new Date().toISOString(),
+
+      autoShipAt:
+        Date.now() + 60000,
+
+      cancelledAt: null
 
     };
 
-    // REMOVE OLD
+    // REMOVE OLD DUPLICATE
     orders = orders.filter(
       o =>
 
@@ -196,11 +234,45 @@ app.post("/create-shipment", async (req, res) => {
 
     );
 
-    // SAVE NEW
+    // SAVE ORDER
     orders.unshift(savedOrder);
 
+    console.log("📦 ORDER SAVED:", savedOrder.orderId);
+
     // ======================================
-    // INSTANT RESPONSE
+    // SEND CUSTOMER EMAIL
+    // ======================================
+
+    await sendEmail(
+
+      order.email,
+
+      "Order Placed Successfully",
+
+      `
+      <h2>Order Placed Successfully</h2>
+
+      <p>
+        Your order has been placed successfully.
+      </p>
+
+      <p>
+        Order ID: ${order.orderId}
+      </p>
+
+      <p>
+        Total: ₹${order.total}
+      </p>
+
+      <p>
+        You can cancel this order within 24 hours.
+      </p>
+      `
+
+    );
+
+    // ======================================
+    // SUCCESS RESPONSE
     // ======================================
 
     res.json({
@@ -215,7 +287,7 @@ app.post("/create-shipment", async (req, res) => {
     });
 
     // ======================================
-    // AUTO SHIPMENT AFTER 30 MIN
+    // AUTO SHIPMENT AFTER 24 HOURS
     // ======================================
 
     setTimeout(async () => {
@@ -284,71 +356,73 @@ app.post("/create-shipment", async (req, res) => {
         const data =
           await response.json();
 
-    console.log(
-  "🚚 FULL NIMBUS RESPONSE:",
-  JSON.stringify(data, null, 2)
-);
+        console.log(
+          "🚚 FULL NIMBUS RESPONSE:",
+          JSON.stringify(data, null, 2)
+        );
 
-const nimbusOrderId =
+        const nimbusOrderId =
 
-  data?.data?.order_id ||
+          data?.data?.order_id ||
 
-  data?.order_id ||
+          data?.order_id ||
 
-  data?.data?.shipment_id ||
+          data?.data?.shipment_id ||
 
-  "";
+          "";
 
-const awb =
+        const awb =
 
-  data?.data?.awb_number ||
+          data?.data?.awb_number ||
 
-  data?.awb_number ||
+          data?.awb_number ||
 
-  "";
+          "";
 
-console.log(
-  "🔥 SAVED NIMBUS ID:",
-  nimbusOrderId
-);
+        console.log(
+          "🔥 SAVED NIMBUS ID:",
+          nimbusOrderId
+        );
 
-console.log(
-  "🔥 SAVED AWB:",
-  awb
-);
-orders = orders.map(o => {
+        console.log(
+          "🔥 SAVED AWB:",
+          awb
+        );
 
-  if (
-    String(o.orderId) ===
-    String(order.orderId)
-  ) {
+        // UPDATE ORDER
+        orders = orders.map(o => {
 
-    return {
+          if (
+            String(o.orderId) ===
+            String(order.orderId)
+          ) {
 
-      ...o,
+            return {
 
-      nimbusOrderId:
-        nimbusOrderId,
+              ...o,
 
-      awb:
-        awb,
+              nimbusOrderId,
 
-      nimbusResponse:
-        data,
+              awb,
 
-      status:
-        "Order Placed",
+              nimbusResponse:
+                data,
 
-      shipmentStatus:
-        "Created"
+              status:
+                "Order Placed",
 
-    };
+              shipmentStatus:
+                "Created"
 
-  }
+            };
 
-  return o;
+          }
 
-});
+          return o;
+
+        });
+
+        console.log("✅ Shipment Created");
 
       } catch (e) {
 
@@ -359,7 +433,7 @@ orders = orders.map(o => {
 
       }
 
-    }, 2000);
+    }, 60000);
 
   } catch (err) {
 
@@ -387,58 +461,90 @@ orders = orders.map(o => {
 // ======================================
 // CANCEL ORDER
 // ======================================
+
 app.post("/cancel-order", async (req, res) => {
 
   try {
 
     const {
-
-      orderId,
-
-      nimbusOrderId
-
+      orderId
     } = req.body;
+
+    const latestOrder =
+      orders.find(
+
+        o =>
+
+          String(o.orderId) ===
+
+          String(orderId)
+
+      );
+
+    if (!latestOrder) {
+
+      return res.json({
+
+        success: false,
+
+        message:
+          "Order not found"
+
+      });
+
+    }
 
     // ======================================
     // LOCAL CANCEL
     // ======================================
 
-    orders = orders.map(order => {
+    latestOrder.status =
+      "Cancelled";
 
-      if (
+    latestOrder.shipmentStatus =
+      "Cancelled";
 
-        String(order.orderId) ===
-
-        String(orderId)
-
-      ) {
-
-        return {
-
-          ...order,
-
-          status:
-            "Cancelled",
-
-          shipmentStatus:
-            "Cancelled",
-
-          cancelledAt:
-            new Date().toISOString()
-
-        };
-
-      }
-
-      return order;
-
-    });
+    latestOrder.cancelledAt =
+      new Date().toISOString();
 
     // ======================================
-    // IF SHIPMENT NOT CREATED YET
+    // SEND CANCEL EMAIL
     // ======================================
 
-    if (!nimbusOrderId) {
+    await sendEmail(
+
+      latestOrder.email,
+
+      "Order Cancelled",
+
+      `
+      <h2>Order Cancelled Successfully</h2>
+
+      <p>
+        Your order has been cancelled.
+      </p>
+
+      <p>
+        Order ID:
+        ${latestOrder.orderId}
+      </p>
+
+      <p>
+        Refund (if applicable)
+        will be processed
+        within 5-7 business days.
+      </p>
+      `
+
+    );
+
+    // ======================================
+    // IF SHIPMENT NOT CREATED
+    // ======================================
+
+    if (
+      !latestOrder.awb
+    ) {
 
       return res.json({
 
@@ -452,14 +558,21 @@ app.post("/cancel-order", async (req, res) => {
     }
 
     console.log(
-      "🔥 Cancelling Nimbus Order:",
-      nimbusOrderId
+      "🔥 Cancelling Shipment AWB:",
+      latestOrder.awb
     );
+
+    // ======================================
+    // NIMBUS CANCEL
+    // ======================================
 
     const form =
       new FormData();
 
-   form.append("awb", String(latestOrder.awb));
+    form.append(
+      "awb",
+      String(latestOrder.awb)
+    );
 
     const response =
       await fetch(
@@ -504,7 +617,7 @@ app.post("/cancel-order", async (req, res) => {
 
         data.message ||
 
-        "Order cancelled",
+        "Order cancelled successfully",
 
       data
 
@@ -533,6 +646,7 @@ app.post("/cancel-order", async (req, res) => {
 // ======================================
 // GET ALL ORDERS
 // ======================================
+
 app.get("/orders", (req, res) => {
 
   res.json(orders);
@@ -542,6 +656,7 @@ app.get("/orders", (req, res) => {
 // ======================================
 // GET SINGLE ORDER
 // ======================================
+
 app.get("/get-order/:id", (req, res) => {
 
   const order =
@@ -589,6 +704,7 @@ app.get("/get-order/:id", (req, res) => {
 // ======================================
 // TEST
 // ======================================
+
 app.get("/test", (req, res) => {
 
   res.json({
@@ -605,6 +721,7 @@ app.get("/test", (req, res) => {
 // ======================================
 // START SERVER
 // ======================================
+
 app.listen(PORT, () => {
 
   console.log(
