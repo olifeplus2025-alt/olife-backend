@@ -1,10 +1,8 @@
-
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
 const FormData = require("form-data");
 const nodemailer = require("nodemailer");
-
 
 require("dotenv").config();
 
@@ -15,11 +13,15 @@ app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 
+// ============================================
+// MEMORY DATABASE
+// ============================================
+
 let orders = [];
 
-// ======================================
+// ============================================
 // EMAIL SETUP
-// ======================================
+// ============================================
 
 const transporter = nodemailer.createTransport({
 
@@ -35,13 +37,15 @@ const transporter = nodemailer.createTransport({
 
 });
 
-// ======================================
+// ============================================
 // SEND EMAIL
-// ======================================
+// ============================================
 
 async function sendEmail(to, subject, html) {
 
   try {
+
+    if (!to) return;
 
     await transporter.sendMail({
 
@@ -59,15 +63,40 @@ async function sendEmail(to, subject, html) {
 
   } catch (err) {
 
-    console.log("❌ Email Error:", err.message);
+    console.log(
+      "❌ Email Error:",
+      err.message
+    );
 
   }
 
 }
 
-// ======================================
+// ============================================
+// GET NIMBUS ORDER ID
+// ============================================
+
+function getNimbusOrderId(data) {
+
+  return (
+
+    data?.data?.order_id ||
+
+    data?.order_id ||
+
+    data?.data?.shipment_id ||
+
+    data?.shipment_id ||
+
+    ""
+
+  );
+
+}
+
+// ============================================
 // CREATE ORDER
-// ======================================
+// ============================================
 
 app.post("/create-shipment", async (req, res) => {
 
@@ -79,9 +108,9 @@ app.post("/create-shipment", async (req, res) => {
       ? order.items
       : [];
 
-    // ======================================
+    // ============================================
     // NIMBUS PAYLOAD
-    // ======================================
+    // ============================================
 
     const payload = {
 
@@ -176,11 +205,8 @@ app.post("/create-shipment", async (req, res) => {
             String(item.price || 0),
 
           sku:
-
             item.id ||
-
             item.sku ||
-
             "SKU" + (index + 1)
 
         })),
@@ -196,9 +222,13 @@ app.post("/create-shipment", async (req, res) => {
 
     };
 
-    // ======================================
-    // SAVE ORDER ONLY
-    // ======================================
+    console.log(
+      "📦 Payload Ready"
+    );
+
+    // ============================================
+    // SAVE ORDER
+    // ============================================
 
     const savedOrder = {
 
@@ -212,20 +242,16 @@ app.post("/create-shipment", async (req, res) => {
 
       nimbusOrderId: "",
 
-      awb: "",
+      nimbusResponse: null,
 
       createdAt:
-        new Date().toISOString(),
-
-      autoShipAt:
-        Date.now() + 60000,
-
-      cancelledAt: null
+        new Date().toISOString()
 
     };
 
-    // REMOVE OLD DUPLICATE
+    // REMOVE DUPLICATE
     orders = orders.filter(
+
       o =>
 
         String(o.orderId || "") !==
@@ -237,11 +263,14 @@ app.post("/create-shipment", async (req, res) => {
     // SAVE ORDER
     orders.unshift(savedOrder);
 
-    console.log("📦 ORDER SAVED:", savedOrder.orderId);
+    console.log(
+      "📦 ORDER SAVED:",
+      savedOrder.orderId
+    );
 
-    // ======================================
-    // SEND CUSTOMER EMAIL
-    // ======================================
+    // ============================================
+    // CUSTOMER EMAIL
+    // ============================================
 
     await sendEmail(
 
@@ -250,30 +279,34 @@ app.post("/create-shipment", async (req, res) => {
       "Order Placed Successfully",
 
       `
-      <h2>Order Placed Successfully</h2>
+
+      <h2>
+        Order Placed Successfully
+      </h2>
 
       <p>
-        Your order has been placed successfully.
+        Order ID:
+        ${order.orderId}
       </p>
 
       <p>
-        Order ID: ${order.orderId}
+        Total:
+        ₹${order.total}
       </p>
 
       <p>
-        Total: ₹${order.total}
+        You can cancel
+        this order within
+        5 minutes.
       </p>
 
-      <p>
-        You can cancel this order within 24 hours.
-      </p>
       `
 
     );
 
-    // ======================================
-    // SUCCESS RESPONSE
-    // ======================================
+    // ============================================
+    // FAST RESPONSE
+    // ============================================
 
     res.json({
 
@@ -286,9 +319,9 @@ app.post("/create-shipment", async (req, res) => {
 
     });
 
-    // ======================================
-    // AUTO SHIPMENT AFTER 24 HOURS
-    // ======================================
+    // ============================================
+    // AUTO SHIPMENT AFTER 5 MINUTES
+    // ============================================
 
     setTimeout(async () => {
 
@@ -305,18 +338,11 @@ app.post("/create-shipment", async (req, res) => {
 
           );
 
-        // STOP IF CANCELLED
-        if (
-
-          !latestOrder ||
-
-          latestOrder.status ===
-            "Cancelled"
-
-        ) {
+        // ORDER CANCELLED
+        if (!latestOrder) {
 
           console.log(
-            "❌ Shipment skipped"
+            "❌ Order deleted before shipment"
           );
 
           return;
@@ -327,113 +353,116 @@ app.post("/create-shipment", async (req, res) => {
           "🚚 Creating Shipment..."
         );
 
-        const response = await fetch(
+        const response =
+          await fetch(
 
-          "https://ship.nimbuspost.com/api/shipments/create",
+            "https://ship.nimbuspost.com/api/shipments/create",
 
-          {
+            {
 
-            method: "POST",
+              method: "POST",
 
-            headers: {
+              headers: {
 
-              "NP-API-KEY":
-                process.env
-                  .NIMBUS_API_KEY,
+                "NP-API-KEY":
+                  process.env.NIMBUS_API_KEY,
 
-              "Content-Type":
-                "application/json"
+                "Content-Type":
+                  "application/json"
 
-            },
+              },
 
-            body:
-              JSON.stringify(payload)
+              body:
+                JSON.stringify(payload)
 
-          }
+            }
 
-        );
+          );
 
         const data =
           await response.json();
 
         console.log(
-          "🚚 FULL NIMBUS RESPONSE:",
-          JSON.stringify(data, null, 2)
+          "🚚 Nimbus Response:",
+          data
         );
 
         const nimbusOrderId =
+          getNimbusOrderId(data);
 
-          data?.data?.order_id ||
+        latestOrder.nimbusOrderId =
+          nimbusOrderId;
 
-          data?.order_id ||
+        latestOrder.nimbusResponse =
+          data;
 
-          data?.data?.shipment_id ||
+        latestOrder.status =
+          "Order Placed";
 
-          "";
+        latestOrder.shipmentStatus =
+          data.status === true
+            ? "Created"
+            : "Failed";
 
-        const awb =
+        // ============================================
+        // ADMIN EMAIL
+        // ============================================
 
-          data?.data?.awb_number ||
+        await sendEmail(
 
-          data?.awb_number ||
+          process.env.OLIFE_ADMIN_EMAIL,
 
-          "";
+          "🚚 New Order Booked",
 
-        console.log(
-          "🔥 SAVED NIMBUS ID:",
-          nimbusOrderId
+          `
+
+          <h2>
+            New Order Booked
+          </h2>
+
+          <p>
+            Customer:
+            ${order.name}
+          </p>
+
+          <p>
+            Phone:
+            ${order.phone}
+          </p>
+
+          <p>
+            Total:
+            ₹${order.total}
+          </p>
+
+          <p>
+            Order ID:
+            ${order.orderId}
+          </p>
+
+          <p>
+            Nimbus Order ID:
+            ${nimbusOrderId}
+          </p>
+
+          `
+
         );
 
         console.log(
-          "🔥 SAVED AWB:",
-          awb
+          "✅ Shipment Created"
         );
 
-        // UPDATE ORDER
-        orders = orders.map(o => {
-
-          if (
-            String(o.orderId) ===
-            String(order.orderId)
-          ) {
-
-            return {
-
-              ...o,
-
-              nimbusOrderId,
-
-              awb,
-
-              nimbusResponse:
-                data,
-
-              status:
-                "Order Placed",
-
-              shipmentStatus:
-                "Created"
-
-            };
-
-          }
-
-          return o;
-
-        });
-
-        console.log("✅ Shipment Created");
-
-      } catch (e) {
+      } catch (err) {
 
         console.log(
           "❌ Shipment Error:",
-          e.message
+          err.message
         );
 
       }
 
-    }, 60000);
+    }, 300000);
 
   } catch (err) {
 
@@ -447,7 +476,7 @@ app.post("/create-shipment", async (req, res) => {
       success: false,
 
       message:
-        "Order create failed",
+        "Shipment create failed",
 
       error:
         err.message
@@ -458,168 +487,50 @@ app.post("/create-shipment", async (req, res) => {
 
 });
 
-// ======================================
+// ============================================
 // CANCEL ORDER
-// ======================================
+// ============================================
 
 app.post("/cancel-order", async (req, res) => {
 
   try {
 
-    const {
-      orderId
-    } = req.body;
+    const { orderId } = req.body;
 
-    const latestOrder =
-      orders.find(
-
-        o =>
-
-          String(o.orderId) ===
-
-          String(orderId)
-
-      );
-
-    if (!latestOrder) {
+    if (!orderId) {
 
       return res.json({
 
         success: false,
 
         message:
-          "Order not found"
+          "Order ID missing"
 
       });
 
     }
 
-    // ======================================
-    // LOCAL CANCEL
-    // ======================================
+    // DELETE ORDER
+    orders = orders.filter(
 
-    latestOrder.status =
-      "Cancelled";
+      order =>
 
-    latestOrder.shipmentStatus =
-      "Cancelled";
+        String(order.orderId) !==
 
-    latestOrder.cancelledAt =
-      new Date().toISOString();
-
-    // ======================================
-    // SEND CANCEL EMAIL
-    // ======================================
-
-    await sendEmail(
-
-      latestOrder.email,
-
-      "Order Cancelled",
-
-      `
-      <h2>Order Cancelled Successfully</h2>
-
-      <p>
-        Your order has been cancelled.
-      </p>
-
-      <p>
-        Order ID:
-        ${latestOrder.orderId}
-      </p>
-
-      <p>
-        Refund (if applicable)
-        will be processed
-        within 5-7 business days.
-      </p>
-      `
+        String(orderId)
 
     );
-
-    // ======================================
-    // IF SHIPMENT NOT CREATED
-    // ======================================
-
-    if (
-      !latestOrder.awb
-    ) {
-
-      return res.json({
-
-        success: true,
-
-        message:
-          "Order cancelled successfully before shipment"
-
-      });
-
-    }
 
     console.log(
-      "🔥 Cancelling Shipment AWB:",
-      latestOrder.awb
-    );
-
-    // ======================================
-    // NIMBUS CANCEL
-    // ======================================
-
-    const form =
-      new FormData();
-
-    form.append(
-      "awb",
-      String(latestOrder.awb)
-    );
-
-    const response =
-      await fetch(
-
-        "https://ship.nimbuspost.com/api/shipment/cancel",
-
-        {
-
-          method: "POST",
-
-          headers: {
-
-            "NP-API-KEY":
-
-              process.env
-                .NIMBUS_API_KEY,
-
-            ...form.getHeaders()
-
-          },
-
-          body: form
-
-        }
-
-      );
-
-    const data =
-      await response.json();
-
-    console.log(
-      "🔥 Nimbus Cancel Response:",
-      data
+      "❌ Order deleted"
     );
 
     return res.json({
 
-      success:
-        data.status === true,
+      success: true,
 
       message:
-
-        data.message ||
-
-        "Order cancelled successfully",
-
-      data
+        "Order cancelled successfully"
 
     });
 
@@ -627,7 +538,7 @@ app.post("/cancel-order", async (req, res) => {
 
     console.error(
       "❌ Cancel Error:",
-      err
+      err.message
     );
 
     return res.status(500).json({
@@ -643,9 +554,9 @@ app.post("/cancel-order", async (req, res) => {
 
 });
 
-// ======================================
+// ============================================
 // GET ALL ORDERS
-// ======================================
+// ============================================
 
 app.get("/orders", (req, res) => {
 
@@ -653,30 +564,25 @@ app.get("/orders", (req, res) => {
 
 });
 
-// ======================================
+// ============================================
 // GET SINGLE ORDER
-// ======================================
+// ============================================
 
 app.get("/get-order/:id", (req, res) => {
 
-  const order =
-    orders.find(
+  const order = orders.find(
 
-      o =>
+    o =>
 
-        String(o.orderId || "") ===
+      String(o.orderId || "") ===
+      String(req.params.id)
 
-        String(req.params.id)
+      ||
 
-        ||
+      String(o.nimbusOrderId || "") ===
+      String(req.params.id)
 
-        String(
-          o.nimbusOrderId || ""
-        ) ===
-
-        String(req.params.id)
-
-    );
+  );
 
   if (!order) {
 
@@ -701,9 +607,9 @@ app.get("/get-order/:id", (req, res) => {
 
 });
 
-// ======================================
-// TEST
-// ======================================
+// ============================================
+// TEST ROUTE
+// ============================================
 
 app.get("/test", (req, res) => {
 
@@ -718,15 +624,13 @@ app.get("/test", (req, res) => {
 
 });
 
-// ======================================
+// ============================================
 // START SERVER
-// ======================================
+// ============================================
 
 app.listen(PORT, () => {
 
   console.log(
-    "🚀 Server running on port " +
-    PORT
+    "🚀 Server running on port " + PORT
   );
-
 });
