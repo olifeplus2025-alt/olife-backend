@@ -1,658 +1,648 @@
-const express = require("express");
-const cors = require("cors");
-const fetch = require("node-fetch");
-const FormData = require("form-data");
-const nodemailer = require("nodemailer");
+  const express = require("express");
+  const cors = require("cors");
+  const fetch = require("node-fetch");
+  const FormData = require("form-data");
+  const nodemailer = require("nodemailer");
 
-require("dotenv").config();
+  require("dotenv").config();
 
-const app = express();
+  const app = express();
 
-app.use(express.json());
-app.use(cors());
+  app.use(express.json());
+  app.use(cors());
 
-const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || 5000;
 
-// ============================================
-// MEMORY DATABASE
-// ============================================
+  // ============================================
+  // MEMORY DATABASE
+  // ============================================
 
-let orders = [];
+  let orders = [];
 
-// ============================================
-// EMAIL SETUP
-// ============================================
+  // ============================================
+  // EMAIL SETUP
+  // ============================================
 
-const transporter = nodemailer.createTransport({
+  const transporter = nodemailer.createTransport({
 
-  service: "gmail",
+    service: "gmail",
 
-  auth: {
+    auth: {
 
-    user: process.env.EMAIL_USER,
+      user: process.env.EMAIL_USER,
 
-    pass: process.env.EMAIL_PASS
+      pass: process.env.EMAIL_PASS
+
+    }
+
+  });
+
+  // ============================================
+  // SEND EMAIL
+  // ============================================
+
+  async function sendEmail(to, subject, html) {
+
+    try {
+
+      if (!to) return;
+
+      await transporter.sendMail({
+
+        from: process.env.EMAIL_USER,
+
+        to,
+
+        subject,
+
+        html
+
+      });
+
+      console.log("✅ Email Sent");
+
+    } catch (err) {
+
+      console.log(
+        "❌ Email Error:",
+        err.message
+      );
+
+    }
 
   }
 
-});
+  // ============================================
+  // GET NIMBUS ORDER ID
+  // ============================================
 
-// ============================================
-// SEND EMAIL
-// ============================================
+  function getNimbusOrderId(data) {
 
-async function sendEmail(to, subject, html) {
+    return (
 
-  try {
+      data?.data?.order_id ||
 
-    if (!to) return;
+      data?.order_id ||
 
-    await transporter.sendMail({
+      data?.data?.shipment_id ||
 
-      from: process.env.EMAIL_USER,
+      data?.shipment_id ||
 
-      to,
+      ""
 
-      subject,
-
-      html
-
-    });
-
-    console.log("✅ Email Sent");
-
-  } catch (err) {
-
-    console.log(
-      "❌ Email Error:",
-      err.message
     );
 
   }
 
-}
+  // ============================================
+  // CREATE ORDER
+  // ============================================
 
-// ============================================
-// GET NIMBUS ORDER ID
-// ============================================
+  app.post("/create-shipment", async (req, res) => {
 
-function getNimbusOrderId(data) {
+    try {
 
-  return (
+      const order = req.body || {};
 
-    data?.data?.order_id ||
+      const items = Array.isArray(order.items)
+        ? order.items
+        : [];
 
-    data?.order_id ||
+      // ============================================
+      // NIMBUS PAYLOAD
+      // ============================================
 
-    data?.data?.shipment_id ||
+      const payload = {
 
-    data?.shipment_id ||
-
-    ""
-
-  );
-
-}
-
-// ============================================
-// CREATE ORDER
-// ============================================
-
-app.post("/create-shipment", async (req, res) => {
-
-  try {
-
-    const order = req.body || {};
-
-    const items = Array.isArray(order.items)
-      ? order.items
-      : [];
-
-    // ============================================
-    // NIMBUS PAYLOAD
-    // ============================================
-
-    const payload = {
-
-      consignee: {
-
-        name:
-          order.name ||
-          order.customerName ||
-          "Customer",
-
-        address:
-          order.address || "",
-
-        address_2:
-          order.address_2 || "",
-
-        city:
-          order.city || "",
-
-        state:
-          order.state || "",
-
-        pincode:
-          String(order.pincode || ""),
-
-        phone:
-          String(
-            order.phone ||
-            order.phoneNumber ||
-            ""
-          )
-
-      },
-
-      order: {
-
-        order_number:
-          order.orderId ||
-          "ORD" + Date.now(),
-
-        shipping_charges:
-          Number(order.shipping || 0),
-
-        discount:
-          Number(order.discount || 0),
-
-        cod_charges:
-          Number(order.codCharge || 0),
-
-        payment_type:
-
-          (
-            order.paymentMethod ||
-            order.paymentType
-          ) === "COD"
-
-            ? "cod"
-
-            : "prepaid",
-
-        total:
-          Number(order.total || 0),
-
-        package_weight:
-          Number(order.package_weight || 300),
-
-        package_length:
-          Number(order.package_length || 10),
-
-        package_height:
-          Number(order.package_height || 10),
-
-        package_breadth:
-          Number(order.package_breadth || 10)
-
-      },
-
-      order_items:
-        items.map((item, index) => ({
+        consignee: {
 
           name:
-            item.name || "Product",
+            order.name ||
+            order.customerName ||
+            "Customer",
 
-          qty:
+          address:
+            order.address || "",
+
+          address_2:
+            order.address_2 || "",
+
+          city:
+            order.city || "",
+
+          state:
+            order.state || "",
+
+          pincode:
+            String(order.pincode || ""),
+
+          phone:
             String(
-              item.quantity ||
-              item.qty ||
-              1
-            ),
+              order.phone ||
+              order.phoneNumber ||
+              ""
+            )
 
-          price:
-            String(item.price || 0),
+        },
 
-          sku:
-            item.id ||
-            item.sku ||
-            "SKU" + (index + 1)
+        order: {
 
-        })),
+          order_number:
+            order.orderId ||
+            "ORD" + Date.now(),
 
-      pickup_warehouse_id:
-        process.env.PICKUP_WAREHOUSE_ID,
+          shipping_charges:
+            Number(order.shipping || 0),
 
-      rto_warehouse_id:
+          discount:
+            Number(order.discount || 0),
 
-        process.env.RTO_WAREHOUSE_ID ||
+          cod_charges:
+            Number(order.codCharge || 0),
 
-        process.env.PICKUP_WAREHOUSE_ID
+          payment_type:
 
-    };
+            (
+              order.paymentMethod ||
+              order.paymentType
+            ) === "COD"
 
-    console.log(
-      "📦 Payload Ready"
-    );
+              ? "cod"
 
-    // ============================================
-    // SAVE ORDER
-    // ============================================
+              : "prepaid",
 
-    const savedOrder = {
+          total:
+            Number(order.total || 0),
 
-      ...order,
+          package_weight:
+            Number(order.package_weight || 300),
 
-      status:
-        "Pending Confirmation",
+          package_length:
+            Number(order.package_length || 10),
 
-      shipmentStatus:
-        "Pending",
+          package_height:
+            Number(order.package_height || 10),
 
-      nimbusOrderId: "",
+          package_breadth:
+            Number(order.package_breadth || 10)
 
-      nimbusResponse: null,
+        },
 
-      createdAt:
-        new Date().toISOString()
+        order_items:
+          items.map((item, index) => ({
 
-    };
+            name:
+              item.name || "Product",
 
-    // REMOVE DUPLICATE
-    orders = orders.filter(
+            qty:
+              String(
+                item.quantity ||
+                item.qty ||
+                1
+              ),
 
-      o =>
+            price:
+              String(item.price || 0),
 
-        String(o.orderId || "") !==
+            sku:
+              item.id ||
+              item.sku ||
+              "SKU" + (index + 1)
 
-        String(savedOrder.orderId || "")
+          })),
 
-    );
+        pickup_warehouse_id:
+          process.env.PICKUP_WAREHOUSE_ID,
 
-    // SAVE ORDER
-    orders.unshift(savedOrder);
+        rto_warehouse_id:
 
-    console.log(
-      "📦 ORDER SAVED:",
-      savedOrder.orderId
-    );
+          process.env.RTO_WAREHOUSE_ID ||
 
-    // ============================================
-    // CUSTOMER EMAIL
-    // ============================================
+          process.env.PICKUP_WAREHOUSE_ID
 
-    await sendEmail(
+      };
 
-      order.email,
+      console.log(
+        "📦 Payload Ready"
+      );
 
-      "Order Placed Successfully",
+      // ============================================
+      // SAVE ORDER
+      // ============================================
 
-      `
+      const savedOrder = {
+        ...order,
+        status: "Order Placed",
+        shipmentStatus: "Processing",
+        nimbusOrderId: "",
+        nimbusResponse: null,
+        createdAt: new Date().toISOString()
+      };
 
-      <h2>
-        Order Placed Successfully
-      </h2>
+      // REMOVE DUPLICATE
+      orders = orders.filter(
 
-      <p>
-        Order ID:
-        ${order.orderId}
-      </p>
+        o =>
 
-      <p>
-        Total:
-        ₹${order.total}
-      </p>
+          String(o.orderId || "") !==
 
-      <p>
-        You can cancel
-        this order within
-        5 minutes.
-      </p>
+          String(savedOrder.orderId || "")
 
-      `
+      );
 
-    );
-const adminEmailTemplate = `
-<div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
-  <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+      // SAVE ORDER
+      orders.unshift(savedOrder);
 
-    <div style="background:#0B3D91;padding:25px;text-align:center;">
-      <h1 style="color:#fff;margin:0;">🛒 New Order Received</h1>
-      <p style="color:#dbe8ff;margin-top:8px;">OlifePlus Admin Notification</p>
-    </div>
+      console.log(
+        "📦 ORDER SAVED:",
+        savedOrder.orderId
+      );
 
-    <div style="padding:30px;">
-      <h2 style="color:#222;">Customer Details</h2>
+      // ============================================
+      // CUSTOMER EMAIL
+      // ============================================
 
-      <table style="width:100%;border-collapse:collapse;">
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Name</strong></td>
-          <td style="padding:10px;border-bottom:1px solid #eee;">${order.name || "-"}</td>
-        </tr>
+      await sendEmail(
 
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Email</strong></td>
-          <td style="padding:10px;border-bottom:1px solid #eee;">${order.email || "-"}</td>
-        </tr>
+        order.email,
 
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Phone</strong></td>
-          <td style="padding:10px;border-bottom:1px solid #eee;">${order.phone || "-"}</td>
-        </tr>
+        "Order Placed Successfully",
 
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Order ID</strong></td>
-          <td style="padding:10px;border-bottom:1px solid #eee;">${order.orderId || "-"}</td>
-        </tr>
+        `
 
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Total Amount</strong></td>
-          <td style="padding:10px;border-bottom:1px solid #eee;">₹${order.total || 0}</td>
-        </tr>
+        <h2>
+          Order Placed Successfully
+        </h2>
 
-        <tr>
-          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Payment Method</strong></td>
-          <td style="padding:10px;border-bottom:1px solid #eee;">${order.paymentMethod || "-"}</td>
-        </tr>
-      </table>
+        <p>
+          Order ID:
+          ${order.orderId}
+        </p>
 
-      <div style="margin-top:20px;padding:15px;background:#f8fafc;border-left:4px solid #0B3D91;">
-        <strong>Shipping Address</strong><br>
-        ${order.address || "-"}<br>
-        ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+        <p>
+          Total:
+          ₹${order.total}
+        </p>
+
+        <p>
+          You can cancel
+          this order within
+          5 minutes.
+        </p>
+
+        `
+
+      );
+      const adminEmailTemplate = `
+  <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
+    <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+
+      <div style="background:#0B3D91;padding:25px;text-align:center;">
+        <h1 style="color:#fff;margin:0;">🛒 New Order Received</h1>
+        <p style="color:#dbe8ff;margin-top:8px;">OlifePlus Admin Notification</p>
       </div>
-    </div>
 
-    <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
-      © 2026 OlifePlus | Order Management System
-    </div>
+      <div style="padding:30px;">
+        <h2 style="color:#222;">Customer Details</h2>
 
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Name</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #eee;">${order.name || "-"}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Email</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #eee;">${order.email || "-"}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Phone</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #eee;">${order.phone || "-"}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Order ID</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #eee;">${order.orderId || "-"}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Total Amount</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #eee;">₹${order.total || 0}</td>
+          </tr>
+
+          <tr>
+            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Payment Method</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #eee;">${order.paymentMethod || "-"}</td>
+          </tr>
+        </table>
+
+        <div style="margin-top:20px;padding:15px;background:#f8fafc;border-left:4px solid #0B3D91;">
+          <strong>Shipping Address</strong><br>
+          ${order.address || "-"}<br>
+          ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+        </div>
+      </div>
+
+      <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
+        © 2026 OlifePlus | Order Management System
+      </div>
+
+    </div>
   </div>
-</div>
-`;
+  `;
 
-await sendEmail(
-  process.env.OLIFE_ADMIN_EMAIL,
-  `🛒 New Order #${order.orderId}`,
-  adminEmailTemplate
-);
-    // ============================================
-    // FAST RESPONSE
-    // ============================================
+      await sendEmail(
+        process.env.OLIFE_ADMIN_EMAIL,
+        `🛒 New Order #${order.orderId}`,
+        adminEmailTemplate
+      );
+      // ============================================
+      // FAST RESPONSE
+      // ============================================
 
-    res.json({
+      res.json({
 
-      success: true,
+        success: true,
 
-      message:
-        "Order placed successfully",
+        message:
+          "Order placed successfully",
 
-      order: savedOrder
+        order: savedOrder
 
-    });
+      });
 
-    // ============================================
-    // AUTO SHIPMENT AFTER 5 MINUTES
-    // ============================================
+      // ============================================
+      // AUTO SHIPMENT AFTER 5 MINUTES
+      // ============================================
 
-    setTimeout(async () => {
+      setTimeout(async () => {
 
-      try {
+        try {
 
-        const latestOrder =
-          orders.find(
+          const latestOrder =
+            orders.find(
 
-            o =>
+              o =>
 
-              String(o.orderId) ===
+                String(o.orderId) ===
 
-              String(order.orderId)
+                String(order.orderId)
 
-          );
+            );
 
-        // ORDER CANCELLED
-        if (!latestOrder) {
+          // ORDER CANCELLED
+          if (!latestOrder) {
+
+            console.log(
+              "❌ Order deleted before shipment"
+            );
+
+            return;
+
+          }
 
           console.log(
-            "❌ Order deleted before shipment"
+            "🚚 Creating Shipment..."
           );
 
-          return;
+          const response =
+            await fetch(
+
+              "https://ship.nimbuspost.com/api/shipments/create",
+
+              {
+
+                method: "POST",
+
+                headers: {
+
+                  "NP-API-KEY":
+                    process.env.NIMBUS_API_KEY,
+
+                  "Content-Type":
+                    "application/json"
+
+                },
+
+                body:
+                  JSON.stringify(payload)
+
+              }
+
+            );
+
+          const data =
+            await response.json();
+
+          console.log(
+            "🚚 Nimbus Response:",
+            data
+          );
+
+          const nimbusOrderId =
+            getNimbusOrderId(data);
+
+          latestOrder.nimbusOrderId =
+            nimbusOrderId;
+
+          latestOrder.nimbusResponse =
+            data;
+
+          latestOrder.status =
+            "Order Placed";
+
+          latestOrder.shipmentStatus =
+            data.status === true
+              ? "Created"
+              : "Failed";
+
+          // ============================================
+          // ADMIN EMAIL
+          // ============================================
+
+          console.log(
+            "✅ Shipment Created"
+          );
+
+        } catch (err) {
+
+          console.log(
+            "❌ Shipment Error:",
+            err.message
+          );
 
         }
 
-        console.log(
-          "🚚 Creating Shipment..."
-        );
+      }, 300000);
 
-        const response =
-          await fetch(
+    } catch (err) {
 
-            "https://ship.nimbuspost.com/api/shipments/create",
+      console.error(
+        "❌ Create Error:",
+        err.message
+      );
 
-            {
+      res.status(500).json({
 
-              method: "POST",
+        success: false,
 
-              headers: {
+        message:
+          "Shipment create failed",
 
-                "NP-API-KEY":
-                  process.env.NIMBUS_API_KEY,
-
-                "Content-Type":
-                  "application/json"
-
-              },
-
-              body:
-                JSON.stringify(payload)
-
-            }
-
-          );
-
-        const data =
-          await response.json();
-
-        console.log(
-          "🚚 Nimbus Response:",
-          data
-        );
-
-        const nimbusOrderId =
-          getNimbusOrderId(data);
-
-        latestOrder.nimbusOrderId =
-          nimbusOrderId;
-
-        latestOrder.nimbusResponse =
-          data;
-
-        latestOrder.status =
-          "Order Placed";
-
-        latestOrder.shipmentStatus =
-          data.status === true
-            ? "Created"
-            : "Failed";
-
-        // ============================================
-        // ADMIN EMAIL
-        // ============================================
-
-        console.log(
-          "✅ Shipment Created"
-        );
-
-      } catch (err) {
-
-        console.log(
-          "❌ Shipment Error:",
+        error:
           err.message
-        );
+
+      });
+
+    }
+
+  });
+
+  // ============================================
+  // CANCEL ORDER
+  // ============================================
+
+  app.post("/cancel-order", async (req, res) => {
+
+    try {
+
+      const { orderId } = req.body;
+
+      if (!orderId) {
+
+        return res.json({
+
+          success: false,
+
+          message:
+            "Order ID missing"
+
+        });
 
       }
 
-    }, 300000);
+      // DELETE ORDER
+      orders = orders.filter(
 
-  } catch (err) {
+        order =>
 
-    console.error(
-      "❌ Create Error:",
-      err.message
+          String(order.orderId) !==
+
+          String(orderId)
+
+      );
+
+      console.log(
+        "❌ Order deleted"
+      );
+
+      return res.json({
+
+        success: true,
+
+        message:
+          "Order cancelled successfully"
+
+      });
+
+    } catch (err) {
+
+      console.error(
+        "❌ Cancel Error:",
+        err.message
+      );
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          err.message
+
+      });
+
+    }
+
+  });
+
+  // ============================================
+  // GET ALL ORDERS
+  // ============================================
+
+  app.get("/orders", (req, res) => {
+
+    res.json(orders);
+
+  });
+
+  // ============================================
+  // GET SINGLE ORDER
+  // ============================================
+
+  app.get("/get-order/:id", (req, res) => {
+
+    const order = orders.find(
+
+      o =>
+
+        String(o.orderId || "") ===
+        String(req.params.id)
+
+        ||
+
+        String(o.nimbusOrderId || "") ===
+        String(req.params.id)
+
     );
 
-    res.status(500).json({
-
-      success: false,
-
-      message:
-        "Shipment create failed",
-
-      error:
-        err.message
-
-    });
-
-  }
-
-});
-
-// ============================================
-// CANCEL ORDER
-// ============================================
-
-app.post("/cancel-order", async (req, res) => {
-
-  try {
-
-    const { orderId } = req.body;
-
-    if (!orderId) {
+    if (!order) {
 
       return res.json({
 
         success: false,
 
         message:
-          "Order ID missing"
+          "Order not found"
 
       });
 
     }
 
-    // DELETE ORDER
-    orders = orders.filter(
+    res.json({
 
-      order =>
+      success: true,
 
-        String(order.orderId) !==
+      order
 
-        String(orderId)
+    });
 
-    );
+  });
 
-    console.log(
-      "❌ Order deleted"
-    );
+  // ============================================
+  // TEST ROUTE
+  // ============================================
 
-    return res.json({
+  app.get("/test", (req, res) => {
+
+    res.json({
 
       success: true,
 
       message:
-        "Order cancelled successfully"
+        "Server working"
 
     });
 
-  } catch (err) {
+  });
 
-    console.error(
-      "❌ Cancel Error:",
-      err.message
+  // ============================================
+  // START SERVER
+  // ============================================
+
+  app.listen(PORT, () => {
+
+    console.log(
+      "🚀 Server running on port " + PORT
     );
-
-    return res.status(500).json({
-
-      success: false,
-
-      message:
-        err.message
-
-    });
-
-  }
-
-});
-
-// ============================================
-// GET ALL ORDERS
-// ============================================
-
-app.get("/orders", (req, res) => {
-
-  res.json(orders);
-
-});
-
-// ============================================
-// GET SINGLE ORDER
-// ============================================
-
-app.get("/get-order/:id", (req, res) => {
-
-  const order = orders.find(
-
-    o =>
-
-      String(o.orderId || "") ===
-      String(req.params.id)
-
-      ||
-
-      String(o.nimbusOrderId || "") ===
-      String(req.params.id)
-
-  );
-
-  if (!order) {
-
-    return res.json({
-
-      success: false,
-
-      message:
-        "Order not found"
-
-    });
-
-  }
-
-  res.json({
-
-    success: true,
-
-    order
-
   });
-
-});
-
-// ============================================
-// TEST ROUTE
-// ============================================
-
-app.get("/test", (req, res) => {
-
-  res.json({
-
-    success: true,
-
-    message:
-      "Server working"
-
-  });
-
-});
-
-// ============================================
-// START SERVER
-// ============================================
-
-app.listen(PORT, () => {
-
-  console.log(
-    "🚀 Server running on port " + PORT
-  );
-});
