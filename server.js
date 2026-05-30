@@ -408,47 +408,81 @@ app.post("/create-shipment", async (req, res) => {
         // ADMIN EMAIL
         // ============================================
 
+        // ============================================
+        // ADMIN EMAIL
+        // ============================================
+
+        const adminEmailTemplate = `
+<div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
+  <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+
+    <div style="background:#0B3D91;padding:25px;text-align:center;">
+      <h1 style="color:#fff;margin:0;">🛒 New Order Received</h1>
+      <p style="color:#dbe8ff;margin-top:8px;">
+        OlifePlus Admin Notification
+      </p>
+    </div>
+
+    <div style="padding:30px;">
+      <h2 style="color:#222;">Customer Details</h2>
+
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Name</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">${order.name || "-"}</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Email</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">${order.email || "-"}</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Phone</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">${order.phone || "-"}</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Order ID</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">${order.orderId || "-"}</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Total Amount</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">₹${order.total || 0}</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Payment Method</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">${order.paymentMethod || "-"}</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Nimbus Order ID</strong></td>
+          <td style="padding:10px;border-bottom:1px solid #eee;">${nimbusOrderId || "-"}</td>
+        </tr>
+      </table>
+
+      <div style="margin-top:20px;padding:15px;background:#f8fafc;border-left:4px solid #0B3D91;">
+        <strong>Shipping Address</strong><br>
+        ${order.address || "-"}<br>
+        ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+      </div>
+    </div>
+
+    <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
+      © 2026 OlifePlus | Order Management System
+    </div>
+
+  </div>
+</div>
+`;
+
         await sendEmail(
-
           process.env.OLIFE_ADMIN_EMAIL,
-
-          "🚚 New Order Booked",
-
-          `
-
-          <h2>
-            New Order Booked
-          </h2>
-
-          <p>
-            Customer:
-            ${order.name}
-          </p>
-
-          <p>
-            Phone:
-            ${order.phone}
-          </p>
-
-          <p>
-            Total:
-            ₹${order.total}
-          </p>
-
-          <p>
-            Order ID:
-            ${order.orderId}
-          </p>
-
-          <p>
-            Nimbus Order ID:
-            ${nimbusOrderId}
-          </p>
-
-          `
-
+          `🛒 New Order #${order.orderId}`,
+          adminEmailTemplate
         );
-
         console.log(
           "✅ Shipment Created"
         );
