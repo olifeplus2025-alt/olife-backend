@@ -550,104 +550,209 @@
         localStorage.setItem("olifeplusFinalOrder", JSON.stringify(updatedOrder));
       }
     }
-    async function cancelOrder() {
-      if (!currentOrder) {
-        alert("Please load order first");
-        return;
-      }
+   async function cancelOrder() {
 
-      if (!currentOrder.nimbusOrderId) {
+  if (!currentOrder) {
 
-        // shipment not created yet
+    alert(
+      "Please load order first"
+    );
 
-        currentOrder.status = "Cancelled";
+    return;
 
-        currentOrder.shipmentStatus =
-          "Cancelled";
+  }
 
-        updateOrderEverywhere(currentOrder);
+  const confirmCancel =
+    confirm(
+      "Are you sure you want to cancel this order?"
+    );
 
-        document.getElementById("result")
-          .innerHTML = `
+  if (!confirmCancel) return;
 
-      <h2 style="color:red;">
-        Order Cancelled Successfully ✅
-      </h2>
+  try {
 
-    `;
+    document.getElementById(
+      "result"
+    ).innerHTML =
+      "Cancelling order...";
 
-        return;
+    const response =
+      await fetch(
 
-      }
+        `${BACKEND_URL}/cancel-order`,
 
-      if ((currentOrder.status || "").toLowerCase().includes("delivered")) {
-        alert("Order already delivered. Cannot cancel.");
-        return;
-      }
+        {
 
-      const confirmCancel = confirm("Are you sure you want to cancel this order?");
-      if (!confirmCancel) return;
+          method: "POST",
 
-      try {
-        document.getElementById("result").innerHTML = "Cancelling order...";
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-        const response = await fetch(
-          `${BACKEND_URL}/cancel-order`,
-          {
-            method: "POST",
+          body: JSON.stringify({
 
-            headers: {
-              "Content-Type": "application/json"
-            },
+            orderId:
+              currentOrder.orderId,
 
-            body: JSON.stringify({
+            nimbusOrderId:
+              currentOrder.nimbusOrderId
 
-              orderId:
-                currentOrder.orderId,
-
-              nimbusOrderId:
-                currentOrder.nimbusOrderId
-
-            })
-
-          }
-        );
-
-        const data = await response.json();
-
-        console.log("🔥 Cancel Response:", data);
-
-        if (!data.success) {
-
-          alert(data.message || "Cancel failed");
-
-          return;
+          })
 
         }
 
+      );
 
-        // 🔥 UPDATE LOCAL
-        currentOrder = {
-          ...currentOrder,
-          status: "Cancelled",
-          shipmentStatus: "Cancelled",
-          cancelledAt: new Date().toISOString()
-        };
+    const data =
+      await response.json();
 
-        updateOrderEverywhere(currentOrder);
+    console.log(
+      "Cancel Response:",
+      data
+    );
 
-        document.getElementById("result").className = "order-card";
-        document.getElementById("result").innerHTML = `
-      <h2 style="color:red;">Order Cancelled ✅</h2>
-      <div class="meta"><strong>Order ID:</strong> ${currentOrder.orderId}</div>
-      <div class="meta"><strong>Status:</strong> Cancelled</div>
+    if (!data.success) {
+
+      alert(
+        data.message ||
+        "Cancel failed"
+      );
+
+      return;
+
+    }
+
+    // ==================================
+    // UPDATE LOCAL
+    // ==================================
+
+    currentOrder.status =
+      "Cancelled";
+
+    currentOrder.shipmentStatus =
+      "Cancelled";
+
+    currentOrder.cancelledAt =
+      new Date().toISOString();
+
+    // ==================================
+    // UPDATE FIREBASE
+    // ==================================
+
+    try {
+
+      if (
+        window.OlifeFirebase
+          ?.updateOrder
+      ) {
+
+        await window
+          .OlifeFirebase
+          .updateOrder(
+
+            currentOrder.orderId,
+
+            {
+
+              status:
+                "Cancelled",
+
+              shipmentStatus:
+                "Cancelled",
+
+              cancelledAt:
+                currentOrder
+                  .cancelledAt
+
+            }
+
+          );
+
+      }
+
+    } catch (e) {
+
+      console.log(
+        "Firebase update failed",
+        e
+      );
+
+    }
+
+    // ==================================
+    // UPDATE LOCAL STORAGE
+    // ==================================
+
+    updateOrderEverywhere(
+      currentOrder
+    );
+
+    // ==================================
+    // SUCCESS UI
+    // ==================================
+
+    document.getElementById(
+      "result"
+    ).innerHTML = `
+
+      <div class="order-card">
+
+        <h2 style="color:red;">
+          Order Cancelled Successfully ✅
+        </h2>
+
+        <div class="meta">
+
+          <strong>
+            Order ID:
+          </strong>
+
+          ${currentOrder.orderId}
+
+        </div>
+
+        <div class="meta">
+
+          <strong>
+            Status:
+          </strong>
+
+          Cancelled
+
+        </div>
+
+        <div class="meta">
+
+          Refund (if applicable)
+          will be processed
+          within 5-7 business days.
+
+        </div>
+
+      </div>
+
     `;
 
-      } catch (err) {
-        console.error(err);
-        alert("Cancel error: " + err.message);
-      }
-    }
+    // OPTIONAL SMS POPUP
+    alert(
+
+      "Your order has been cancelled successfully. Refund (if applicable) will be processed within 5-7 business days."
+
+    );
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert(
+      "Cancel error: " +
+      err.message
+    );
+
+  }
+
+}
     document.addEventListener("DOMContentLoaded", loadOrder);
   </script>
 </body>
