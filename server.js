@@ -538,24 +538,24 @@ app.post("/create-shipment", async (req, res) => {
    </div>
    `;
 
-    // Response immediately
-    res.json({
-      success: true,
-      order: savedOrder
-    });
-
-    // Send emails in background
-    sendEmail(
+    // Send emails before responding
+    await sendEmail(
       order.email,
       "Order Placed Successfully",
       customerEmailTemplate
     );
 
-    sendEmail(
+    await sendEmail(
       process.env.OLIFE_ADMIN_EMAIL,
       `🛒 New Order #${order.orderId}`,
       adminEmailTemplate
     );
+
+    // Response after emails sent
+    res.json({
+      success: true,
+      order: savedOrder
+    });
 
   } catch (err) {
 
