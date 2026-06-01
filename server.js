@@ -213,7 +213,7 @@ setInterval(() => {
 
     console.log(`📋 Order: ${order.orderId} | Time passed: ${Math.floor(timeDiff / 1000)}s | Status: ${order.shipmentStatus}`);
 
-    if (timeDiff >= 5000) {  // 5 मिनट
+    if (timeDiff >= 300000) {  // 5 मिनट
 
       console.log(`\n🚀 CREATING SHIPMENT for Order ${order.orderId} (waited ${Math.floor(timeDiff / 1000)}s)`);
 
@@ -263,7 +263,7 @@ setInterval(() => {
 
   });
 
-}, 10000);  // हर 1 मिनट चेक करो
+}, 60000);  // हर 1 मिनट चेक करो
 
 // ============================================
 // CREATE ORDER
