@@ -512,7 +512,7 @@ app.post("/create-shipment", async (req, res) => {
 
       }
 
-    }, 300000);  // 5 मिनट बाद shipment बनेगा
+    }, 10000);  // 5 मिनट बाद shipment बनेगा
 
   } catch (err) {
 
