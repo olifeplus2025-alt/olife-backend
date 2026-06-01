@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
@@ -45,9 +46,14 @@ async function sendEmail(to, subject, html) {
 
   try {
 
-    if (!to) return;
+    if (!to) {
+      console.log("⚠️ No email recipient provided");
+      return;
+    }
 
-    await transporter.sendMail({
+    console.log(`📧 Sending email to ${to}...`);
+
+    const result = await transporter.sendMail({
 
       from: process.env.EMAIL_USER,
 
@@ -59,13 +65,14 @@ async function sendEmail(to, subject, html) {
 
     });
 
-    console.log("✅ Email Sent");
+    console.log("✅ Email Sent successfully:", result.messageId);
 
   } catch (err) {
 
-    console.log(
+    console.error(
       "❌ Email Error:",
-      err.message
+      err.message,
+      err.response
     );
 
   }
@@ -262,64 +269,108 @@ app.post("/create-shipment", async (req, res) => {
     // CUSTOMER EMAIL
     // ============================================
 
+    const customerEmailTemplate = `
+   <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
+     <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+
+       <div style="background:#0B3D91;padding:25px;text-align:center;">
+         <h1 style="color:#fff;margin:0;">✅ Order Placed Successfully</h1>
+         <p style="color:#dbe8ff;margin-top:8px;">Thank you for your order!</p>
+       </div>
+
+       <div style="padding:30px;">
+         <h2 style="color:#222;">Order Details</h2>
+
+         <table style="width:100%;border-collapse:collapse;">
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Order ID</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.orderId || "-"}</td>
+           </tr>
+
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Total Amount</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">₹${order.total || 0}</td>
+           </tr>
+
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Payment Method</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.paymentMethod || "-"}</td>
+           </tr>
+         </table>
+
+         <div style="margin-top:20px;padding:15px;background:#f8fafc;border-left:4px solid #0B3D91;">
+           <strong>Shipping Address</strong><br>
+           ${order.address || "-"}<br>
+           ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+         </div>
+       </div>
+
+       <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
+         © 2026 OlifePlus | Order Management System
+       </div>
+
+     </div>
+   </div>
+   `;
+
     const adminEmailTemplate = `
-  <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
-    <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+   <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
+     <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
 
-      <div style="background:#0B3D91;padding:25px;text-align:center;">
-        <h1 style="color:#fff;margin:0;">🛒 New Order Received</h1>
-        <p style="color:#dbe8ff;margin-top:8px;">OlifePlus Admin Notification</p>
-      </div>
+       <div style="background:#0B3D91;padding:25px;text-align:center;">
+         <h1 style="color:#fff;margin:0;">🛒 New Order Received</h1>
+         <p style="color:#dbe8ff;margin-top:8px;">OlifePlus Admin Notification</p>
+       </div>
 
-      <div style="padding:30px;">
-        <h2 style="color:#222;">Customer Details</h2>
+       <div style="padding:30px;">
+         <h2 style="color:#222;">Customer Details</h2>
 
-        <table style="width:100%;border-collapse:collapse;">
-          <tr>
-            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Name</strong></td>
-            <td style="padding:10px;border-bottom:1px solid #eee;">${order.name || "-"}</td>
-          </tr>
+         <table style="width:100%;border-collapse:collapse;">
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Name</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.name || "-"}</td>
+           </tr>
 
-          <tr>
-            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Email</strong></td>
-            <td style="padding:10px;border-bottom:1px solid #eee;">${order.email || "-"}</td>
-          </tr>
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Email</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.email || "-"}</td>
+           </tr>
 
-          <tr>
-            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Phone</strong></td>
-            <td style="padding:10px;border-bottom:1px solid #eee;">${order.phone || "-"}</td>
-          </tr>
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Phone</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.phone || "-"}</td>
+           </tr>
 
-          <tr>
-            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Order ID</strong></td>
-            <td style="padding:10px;border-bottom:1px solid #eee;">${order.orderId || "-"}</td>
-          </tr>
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Order ID</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.orderId || "-"}</td>
+           </tr>
 
-          <tr>
-            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Total Amount</strong></td>
-            <td style="padding:10px;border-bottom:1px solid #eee;">₹${order.total || 0}</td>
-          </tr>
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Total Amount</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">₹${order.total || 0}</td>
+           </tr>
 
-          <tr>
-            <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Payment Method</strong></td>
-            <td style="padding:10px;border-bottom:1px solid #eee;">${order.paymentMethod || "-"}</td>
-          </tr>
-        </table>
+           <tr>
+             <td style="padding:10px;border-bottom:1px solid #eee;"><strong>Payment Method</strong></td>
+             <td style="padding:10px;border-bottom:1px solid #eee;">${order.paymentMethod || "-"}</td>
+           </tr>
+         </table>
 
-        <div style="margin-top:20px;padding:15px;background:#f8fafc;border-left:4px solid #0B3D91;">
-          <strong>Shipping Address</strong><br>
-          ${order.address || "-"}<br>
-          ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
-        </div>
-      </div>
+         <div style="margin-top:20px;padding:15px;background:#f8fafc;border-left:4px solid #0B3D91;">
+           <strong>Shipping Address</strong><br>
+           ${order.address || "-"}<br>
+           ${order.city || ""}, ${order.state || ""} - ${order.pincode || ""}
+         </div>
+       </div>
 
-      <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
-        © 2026 OlifePlus | Order Management System
-      </div>
+       <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
+         © 2026 OlifePlus | Order Management System
+       </div>
 
-    </div>
-  </div>
-  `;
+     </div>
+   </div>
+   `;
 
     // Response immediately
     res.json({
@@ -332,17 +383,17 @@ app.post("/create-shipment", async (req, res) => {
       order.email,
       "Order Placed Successfully",
       customerEmailTemplate
-    ).catch(console.error);
+    );
 
     // Send admin email in background
     sendEmail(
       process.env.OLIFE_ADMIN_EMAIL,
       `🛒 New Order #${order.orderId}`,
       adminEmailTemplate
-    ).catch(console.error);
+    );
 
     // ============================================
-    // AUTO SHIPMENT AFTER 5 MINUTES
+    // AUTO SHIPMENT AFTER 5 MINUTES (BACKGROUND)
     // ============================================
 
     setTimeout(async () => {
@@ -360,7 +411,7 @@ app.post("/create-shipment", async (req, res) => {
 
           );
 
-        // ORDER CANCELLED
+        // ORDER CANCELLED - Shipment नहीं बनेगा
         if (!latestOrder) {
 
           console.log(
@@ -374,6 +425,13 @@ app.post("/create-shipment", async (req, res) => {
         console.log(
           "🚚 Creating Shipment..."
         );
+
+        if (!process.env.NIMBUS_API_KEY) {
+          console.error("❌ NIMBUS_API_KEY not set in .env");
+          return;
+        }
+
+        console.log("📦 Payload:", JSON.stringify(payload, null, 2));
 
         const response =
           await fetch(
@@ -401,12 +459,14 @@ app.post("/create-shipment", async (req, res) => {
 
           );
 
+        console.log("📥 Nimbus Response Status:", response.status);
+
         const data =
           await response.json();
 
         console.log(
-          "🚚 Nimbus Response:",
-          data
+          "🚚 Nimbus Response Data:",
+          JSON.stringify(data, null, 2)
         );
 
         const nimbusOrderId =
@@ -426,24 +486,33 @@ app.post("/create-shipment", async (req, res) => {
             ? "Created"
             : "Failed";
 
-        // ============================================
-        // ADMIN EMAIL
-        // ============================================
-
         console.log(
-          "✅ Shipment Created"
+          "✅ Shipment Created with ID:",
+          nimbusOrderId
         );
 
       } catch (err) {
 
-        console.log(
+        console.error(
           "❌ Shipment Error:",
-          err.message
+          err.message,
+          err.stack
         );
+
+        const latestOrder = orders.find(
+          o =>
+            String(o.orderId) ===
+            String(order.orderId)
+        );
+
+        if (latestOrder) {
+          latestOrder.shipmentStatus = "Error";
+          latestOrder.shipmentError = err.message;
+        }
 
       }
 
-    }, 300000);
+    }, 300000);  // 5 मिनट बाद shipment बनेगा
 
   } catch (err) {
 
@@ -606,6 +675,59 @@ app.get("/test", (req, res) => {
 });
 
 // ============================================
+// TEST EMAIL ROUTE
+// ============================================
+
+app.get("/test-email", async (req, res) => {
+
+  try {
+
+    const testEmail = `
+      <div style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px;">
+        <div style="max-width:650px;margin:auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.08);">
+          <div style="background:#0B3D91;padding:25px;text-align:center;">
+            <h1 style="color:#fff;margin:0;">✅ Test Email</h1>
+            <p style="color:#dbe8ff;margin-top:8px;">This is a test email from OlifePlus Server</p>
+          </div>
+          <div style="padding:30px;">
+            <p>If you received this email, the email system is working correctly!</p>
+          </div>
+          <div style="background:#f8f9fa;padding:18px;text-align:center;color:#666;">
+            © 2026 OlifePlus | Test Email
+          </div>
+        </div>
+      </div>
+    `;
+
+    await sendEmail(
+      process.env.OLIFE_ADMIN_EMAIL,
+      "🧪 Test Email from OlifePlus Server",
+      testEmail
+    );
+
+    res.json({
+
+      success: true,
+
+      message: "Test email sent!"
+
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+
+      success: false,
+
+      message: err.message
+
+    });
+
+  }
+
+});
+
+// ============================================
 // START SERVER
 // ============================================
 
@@ -614,4 +736,6 @@ app.listen(PORT, () => {
   console.log(
     "🚀 Server running on port " + PORT
   );
+
 });
+
