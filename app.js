@@ -491,9 +491,9 @@ function renderCartPage() {
             <button onclick="decrementCart('${item.id}')">−</button>
             <span class="qty-v">${item.quantity}</span>
             <button onclick="incrementCart('${item.id}')">+</button>
-          </div>
+            </div>
+            <div class="total-col">${formatPrice(item.price * item.quantity)}</div>
 
-          <div class="total-col">${formatPrice(item.price * item.quantity)}</div>
 
           <button class="del-btn" onclick="removeFromCart('${item.id}')">&#10005;</button>
         </div>
