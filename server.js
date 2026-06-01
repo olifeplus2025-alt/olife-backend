@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
@@ -100,6 +99,171 @@ function getNimbusOrderId(data) {
   );
 
 }
+
+// ============================================
+// CREATE SHIPMENT (FUNCTION)
+// ============================================
+
+async function createShipmentForOrder(order, payload) {
+
+  try {
+
+    const latestOrder = orders.find(
+      o => String(o.orderId) === String(order.orderId)
+    );
+
+    if (!latestOrder) {
+      console.log("❌ Order not found or deleted:", order.orderId);
+      return;
+    }
+
+    // If already created, skip
+    if (latestOrder.shipmentStatus === "Created") {
+      console.log("⏭️  Shipment already created for:", order.orderId);
+      return;
+    }
+
+    console.log("🚚 [SHIPMENT PROCESSOR] Creating Shipment for Order:", order.orderId);
+
+    if (!process.env.NIMBUS_API_KEY) {
+      console.error("❌ NIMBUS_API_KEY not set in .env");
+      latestOrder.shipmentStatus = "Error";
+      latestOrder.shipmentError = "NIMBUS_API_KEY missing";
+      return;
+    }
+
+    console.log("📦 Payload:", JSON.stringify(payload, null, 2));
+
+    const response = await fetch(
+      "https://ship.nimbuspost.com/api/shipments/create",
+      {
+        method: "POST",
+        headers: {
+          "NP-API-KEY": process.env.NIMBUS_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+
+    console.log("📥 Nimbus Response Status:", response.status);
+
+    const data = await response.json();
+
+    console.log(
+      "🚚 Nimbus Response Data:",
+      JSON.stringify(data, null, 2)
+    );
+
+    const nimbusOrderId = getNimbusOrderId(data);
+
+    latestOrder.nimbusOrderId = nimbusOrderId;
+    latestOrder.nimbusResponse = data;
+    latestOrder.status = "Order Placed";
+    latestOrder.shipmentStatus = data.status === true ? "Created" : "Failed";
+    latestOrder.shipmentCreatedAt = new Date().toISOString();
+
+    console.log(
+      "✅ Shipment Created with ID:",
+      nimbusOrderId
+    );
+
+  } catch (err) {
+
+    console.error(
+      "❌ Shipment Error:",
+      err.message,
+      err.stack
+    );
+
+    const latestOrder = orders.find(
+      o => String(o.orderId) === String(order.orderId)
+    );
+
+    if (latestOrder) {
+      latestOrder.shipmentStatus = "Error";
+      latestOrder.shipmentError = err.message;
+    }
+
+  }
+
+}
+
+// ============================================
+// SHIPMENT PROCESSOR (EVERY 1 MINUTE)
+// ============================================
+
+setInterval(() => {
+
+  console.log("\n⏰ [SHIPMENT PROCESSOR] Checking for pending shipments...");
+
+  const now = new Date().getTime();
+
+  orders.forEach(order => {
+
+    // If shipment already created, skip
+    if (order.shipmentStatus === "Created") return;
+
+    // If order was cancelled, skip
+    if (!order.orderId) return;
+
+    // Check if 5 minutes passed (300000ms)
+    const createdTime = new Date(order.createdAt).getTime();
+    const timeDiff = now - createdTime;
+
+    console.log(`📋 Order: ${order.orderId} | Time passed: ${Math.floor(timeDiff / 1000)}s | Status: ${order.shipmentStatus}`);
+
+    if (timeDiff >= 300000) {  // 5 मिनट
+
+      console.log(`\n🚀 CREATING SHIPMENT for Order ${order.orderId} (waited ${Math.floor(timeDiff / 1000)}s)`);
+
+      // Rebuild payload for this order
+      const items = Array.isArray(order.items) ? order.items : [];
+
+      const payload = {
+
+        consignee: {
+          name: order.name || order.customerName || "Customer",
+          address: order.address || "",
+          address_2: order.address_2 || "",
+          city: order.city || "",
+          state: order.state || "",
+          pincode: String(order.pincode || ""),
+          phone: String(order.phone || order.phoneNumber || "")
+        },
+
+        order: {
+          order_number: order.orderId || "ORD" + Date.now(),
+          shipping_charges: Number(order.shipping || 0),
+          discount: Number(order.discount || 0),
+          cod_charges: Number(order.codCharge || 0),
+          payment_type: (order.paymentMethod || order.paymentType) === "COD" ? "cod" : "prepaid",
+          total: Number(order.total || 0),
+          package_weight: Number(order.package_weight || 300),
+          package_length: Number(order.package_length || 10),
+          package_height: Number(order.package_height || 10),
+          package_breadth: Number(order.package_breadth || 10)
+        },
+
+        order_items: items.map((item, index) => ({
+          name: item.name || "Product",
+          qty: String(item.quantity || item.qty || 1),
+          price: String(item.price || 0),
+          sku: item.id || item.sku || "SKU" + (index + 1)
+        })),
+
+        pickup_warehouse_id: process.env.PICKUP_WAREHOUSE_ID,
+        rto_warehouse_id: process.env.RTO_WAREHOUSE_ID || process.env.PICKUP_WAREHOUSE_ID
+
+      };
+
+      createShipmentForOrder(order, payload);
+
+    }
+
+  });
+
+}, 60000);  // हर 1 मिनट चेक करो
 
 // ============================================
 // CREATE ORDER
@@ -243,7 +407,8 @@ app.post("/create-shipment", async (req, res) => {
       shipmentStatus: "Processing",
       nimbusOrderId: "",
       nimbusResponse: null,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      shipmentScheduledFor: new Date(Date.now() + 300000).toISOString()
     };
 
     // REMOVE DUPLICATE
@@ -262,7 +427,8 @@ app.post("/create-shipment", async (req, res) => {
 
     console.log(
       "📦 ORDER SAVED:",
-      savedOrder.orderId
+      savedOrder.orderId,
+      "| Shipment scheduled for:", savedOrder.shipmentScheduledFor
     );
 
     // ============================================
@@ -378,141 +544,18 @@ app.post("/create-shipment", async (req, res) => {
       order: savedOrder
     });
 
-    // Send customer email in background
+    // Send emails in background
     sendEmail(
       order.email,
       "Order Placed Successfully",
       customerEmailTemplate
     );
 
-    // Send admin email in background
     sendEmail(
       process.env.OLIFE_ADMIN_EMAIL,
       `🛒 New Order #${order.orderId}`,
       adminEmailTemplate
     );
-
-    // ============================================
-    // AUTO SHIPMENT AFTER 5 MINUTES (BACKGROUND)
-    // ============================================
-
-    setTimeout(async () => {
-
-      try {
-
-        const latestOrder =
-          orders.find(
-
-            o =>
-
-              String(o.orderId) ===
-
-              String(order.orderId)
-
-          );
-
-        // ORDER CANCELLED - Shipment नहीं बनेगा
-        if (!latestOrder) {
-
-          console.log(
-            "❌ Order deleted before shipment"
-          );
-
-          return;
-
-        }
-
-        console.log(
-          "🚚 Creating Shipment..."
-        );
-
-        if (!process.env.NIMBUS_API_KEY) {
-          console.error("❌ NIMBUS_API_KEY not set in .env");
-          return;
-        }
-
-        console.log("📦 Payload:", JSON.stringify(payload, null, 2));
-
-        const response =
-          await fetch(
-
-            "https://ship.nimbuspost.com/api/shipments/create",
-
-            {
-
-              method: "POST",
-
-              headers: {
-
-                "NP-API-KEY":
-                  process.env.NIMBUS_API_KEY,
-
-                "Content-Type":
-                  "application/json"
-
-              },
-
-              body:
-                JSON.stringify(payload)
-
-            }
-
-          );
-
-        console.log("📥 Nimbus Response Status:", response.status);
-
-        const data =
-          await response.json();
-
-        console.log(
-          "🚚 Nimbus Response Data:",
-          JSON.stringify(data, null, 2)
-        );
-
-        const nimbusOrderId =
-          getNimbusOrderId(data);
-
-        latestOrder.nimbusOrderId =
-          nimbusOrderId;
-
-        latestOrder.nimbusResponse =
-          data;
-
-        latestOrder.status =
-          "Order Placed";
-
-        latestOrder.shipmentStatus =
-          data.status === true
-            ? "Created"
-            : "Failed";
-
-        console.log(
-          "✅ Shipment Created with ID:",
-          nimbusOrderId
-        );
-
-      } catch (err) {
-
-        console.error(
-          "❌ Shipment Error:",
-          err.message,
-          err.stack
-        );
-
-        const latestOrder = orders.find(
-          o =>
-            String(o.orderId) ===
-            String(order.orderId)
-        );
-
-        if (latestOrder) {
-          latestOrder.shipmentStatus = "Error";
-          latestOrder.shipmentError = err.message;
-        }
-
-      }
-
-    }, 10000);  // 5 मिनट बाद shipment बनेगा
 
   } catch (err) {
 
@@ -572,7 +615,8 @@ app.post("/cancel-order", async (req, res) => {
     );
 
     console.log(
-      "❌ Order deleted"
+      "❌ Order deleted:",
+      orderId
     );
 
     return res.json({
@@ -737,5 +781,6 @@ app.listen(PORT, () => {
     "🚀 Server running on port " + PORT
   );
 
-});
+  console.log("📋 Shipment Processor started - checking every 1 minute");
 
+});
