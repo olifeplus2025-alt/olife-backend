@@ -1,116 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="icon" type="image/png" href="logo.png">
+
+  <title>Ayurvedic Skincare Blog | Natural Beauty Tips & Wellness Guides | OlifePlus</title>
+
+  <meta name="description"
+    content="Explore Ayurvedic skincare tips, natural beauty guides, herbal soap benefits, wellness routines, and expert skincare advice from OlifePlus.">
+
+  <meta name="keywords"
+    content="Ayurvedic skincare blog, natural skincare tips, herbal soap benefits, saffron soap benefits, skincare routine, Ayurvedic beauty tips, healthy skin guide, natural beauty blog, skincare articles, wellness blog, OlifePlus">
+
+  <meta name="robots" content="index, follow, max-image-preview:large">
+
+  <link rel="canonical" href="https://olifeplus.com/blog.html">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Ayurvedic Skincare Blog | OlifePlus">
+  <meta property="og:description"
+    content="Natural skincare guides, Ayurvedic beauty tips, herbal wellness articles, and skincare education.">
+  <meta property="og:url" content="https://olifeplus.com/blog.html">
+  <meta property="og:image" content="https://olifeplus.com/Home1.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ayurvedic Skincare Blog | OlifePlus">
+  <meta name="twitter:description"
+    content="Natural skincare guides, Ayurvedic beauty tips, herbal wellness articles, and skincare education.">
+  <meta name="twitter:image" content="https://olifeplus.com/Home1.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Blog — OlifePlus</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+
+  <script type="application/ld+json">
+{
+ "@context":"https://schema.org",
+ "@type":"Blog",
+ "name":"OlifePlus Blog",
+ "url":"https://olifeplus.com/blog.html",
+ "description":"Ayurvedic skincare tips, natural beauty guides, herbal wellness articles and skincare education.",
+ "publisher":{
+   "@type":"Organization",
+   "name":"OlifePlus"
+ }
+}
+</script>
 </head>
+
 <body data-page="blog">
-<!-- ═══════════════════════════════════════ NAVBAR ═══ -->
-<nav id="navbar">
-  <div class="nav-inner">
-    <a class="nav-logo" href="index.html">
-      <img src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png" alt="OlifePlus">
-    </a>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="products.html">Products</a></li>
-      <li><a href="about.html">About Us</a></li>
-      <li><a href="contact.html">Contact</a></li>
-      <li><a href="privacy.html">Privacy</a></li>
-      <li><a href="blog.html" class="active">Blog</a></li>
-    </ul>
-    <div class="nav-right">
-     <a href="login.html"><button class="btn-login">&#128100; Login</button></a>
-      <button class="btn-cart" onclick="openCart()">
-        <span id="cart-icon-wrap">&#128717;</span>
-        <span class="hidden sm-inline">Cart</span>
-        <span class="cart-badge" id="cart-badge">0</span>
-      </button>
-      <div class="hamburger" onclick="toggleMobileMenu()">
-        <span></span><span></span><span></span>
+  <!-- ═══════════════════════════════════════ NAVBAR ═══ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a class="nav-logo" href="index.html">
+        <img src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png"
+          alt="OlifePlus">
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="blog.html" class="active">Blog</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="login.html"><button class="btn-login">&#128100; Login</button></a>
+        <button class="btn-cart" onclick="openCart()">
+          <span id="cart-icon-wrap">&#128717;</span>
+          <span class="hidden sm-inline">Cart</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </button>
+        <div class="hamburger" onclick="toggleMobileMenu()">
+          <span></span><span></span><span></span>
+        </div>
       </div>
     </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════ MOBILE MENU ═══ -->
+  <div id="mobile-menu">
+    <div id="close-menu" onclick="toggleMobileMenu()">&#10005;</div>
+    <a href="index.html" onclick="toggleMobileMenu()">Home</a>
+    <a href="products.html" onclick="toggleMobileMenu()">Products</a>
+    <a href="about.html" onclick="toggleMobileMenu()">About Us</a>
+    <a href="contact.html" onclick="toggleMobileMenu()">Contact</a>
+    <a href="privacy.html" onclick="toggleMobileMenu()">Privacy</a>
+    <a href="blog.html" onclick="toggleMobileMenu()">Blog</a>
+    <a href="login.html" id="mobile-account-link" onclick="toggleMobileMenu()">&#128100; Login</a>
   </div>
-</nav>
 
-<!-- ═══════════════════════════════════════ MOBILE MENU ═══ -->
-<div id="mobile-menu">
-  <div id="close-menu" onclick="toggleMobileMenu()">&#10005;</div>
-  <a href="index.html" onclick="toggleMobileMenu()">Home</a>
-  <a href="products.html" onclick="toggleMobileMenu()">Products</a>
-  <a href="about.html" onclick="toggleMobileMenu()">About Us</a>
-  <a href="contact.html" onclick="toggleMobileMenu()">Contact</a>
-  <a href="privacy.html" onclick="toggleMobileMenu()">Privacy</a>
-  <a href="blog.html" onclick="toggleMobileMenu()">Blog</a>
-  <a href="login.html" id="mobile-account-link" onclick="toggleMobileMenu()">&#128100; Login</a>
-</div>
-
-<!-- ═══════════════════════════════════════ GHOST CART ═══ -->
-<div id="cart-overlay" onclick="closeCart()"></div>
-<aside id="ghost-cart">
-  <div class="gc-header">
-    <div>
-      <div class="sub">Your Vitality Kit</div>
-      <h2 id="gc-title">0 Items</h2>
+  <!-- ═══════════════════════════════════════ GHOST CART ═══ -->
+  <div id="cart-overlay" onclick="closeCart()"></div>
+  <aside id="ghost-cart">
+    <div class="gc-header">
+      <div>
+        <div class="sub">Your Vitality Kit</div>
+        <h2 id="gc-title">0 Items</h2>
+      </div>
+      <button class="gc-close" onclick="closeCart()">&#10005;</button>
     </div>
-    <button class="gc-close" onclick="closeCart()">&#10005;</button>
-  </div>
-  <div class="gc-ship" id="gc-ship-bar">
-    <div class="sh-msg" id="gc-ship-msg">Add <span>₹499</span> for free shipping</div>
-    <div class="bar-track"><div class="bar-fill" id="gc-bar" style="width:0%"></div></div>
-  </div>
-  <div class="gc-items" id="gc-items-list">
-    <div class="gc-empty" id="gc-empty">
-      <div class="e-icon">&#128717;</div>
-      <h3>Your kit is empty</h3>
-      <p>Begin your ritual. Add a product to start your OlifePlus journey.</p>
-      <button class="btn-discover" onclick="closeCart();window.location.href='products.html'">Discover</button>
+    <div class="gc-ship" id="gc-ship-bar">
+      <div class="sh-msg" id="gc-ship-msg">Add <span>₹499</span> for free shipping</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="gc-bar" style="width:0%"></div>
+      </div>
     </div>
-  </div>
-  <div class="gc-footer" id="gc-footer" style="display:none">
-    <div class="gc-subtotal">
-      <span class="s-label">Subtotal</span>
-      <span class="s-val" id="gc-subtotal-val">₹0</span>
+    <div class="gc-items" id="gc-items-list">
+      <div class="gc-empty" id="gc-empty">
+        <div class="e-icon">&#128717;</div>
+        <h3>Your kit is empty</h3>
+        <p>Begin your ritual. Add a product to start your OlifePlus journey.</p>
+        <button class="btn-discover" onclick="closeCart();window.location.href='products.html'">Discover</button>
+      </div>
     </div>
-    <button class="gc-checkout" onclick="closeCart();window.location.href='cart.html'">
-      &#128274; Secure Checkout
-    </button>
-    <button class="gc-continue" onclick="closeCart()">Continue Shopping</button>
-  </div>
-</aside>
+    <div class="gc-footer" id="gc-footer" style="display:none">
+      <div class="gc-subtotal">
+        <span class="s-label">Subtotal</span>
+        <span class="s-val" id="gc-subtotal-val">₹0</span>
+      </div>
+      <button class="gc-checkout" onclick="closeCart();window.location.href='cart.html'">
+        &#128274; Secure Checkout
+      </button>
+      <button class="gc-continue" onclick="closeCart()">Continue Shopping</button>
+    </div>
+  </aside>
 
 
-<div class="container" style="padding-top:120px;padding-bottom:80px">
-    <div style="max-width:600px;margin-bottom:64px">
+  <div class="container" style="padding-top:120px;padding-bottom:80px">
+    <div style="max-width:1200px;margin-bottom:64px">
       <span class="label">The Journal</span>
-      <h1 class="serif" style="font-size:clamp(2.5rem,5vw,4.5rem);line-height:1.02;letter-spacing:-.01em">Notes on <em style="font-style:italic;font-weight:300;color:var(--accent)">Radiance.</em></h1>
-    </div>
+
+      <h1 class="serif" style="font-size:clamp(2.0rem,4.5vw,4.5rem);max-width:1200px;line-height:1.02;letter-spacing:-.01em">
+        Ayurvedic Skincare Blog & Natural Beauty Guides
+      </h1>
+
+      <p style="margin-top:20px;max-width:700px;line-height:1.8;color:#666">
+        Explore expert skincare advice, Ayurvedic wellness tips, herbal soap benefits, natural beauty routines, and
+        healthy skin guides from OlifePlus.
+      </p>
+    </div><br>
     <div class="blog-grid">
       <!-- <article class="blog-card"> -->
-        <article class="blog-card" onclick="openBlogModal(1)">
-          
+      <article class="blog-card" onclick="openBlogModal(1)">
+
         <div class="blog-img"><img src="lifestyle(4).png" alt="Blog 1"></div>
-        <div class="blog-meta"><span class="cat">Science</span><span class="sep">—</span><span class="date">Apr 12, 2026</span></div>
+        <div class="blog-meta"><span class="cat">Science</span><span class="sep">—</span><span class="date">Apr 12,
+            2026</span></div>
         <h2>Benefits of Natural Soap</h2>
         <p>Why plant-based formulations outperform synthetic cleansers — and what your skin barrier actually needs.</p>
         <span class="blog-read">Read Article &#8594;</span>
       </article>
       <!-- <article class="blog-card"> -->
-        <article class="blog-card" onclick="openBlogModal(2)">
-        <div class="blog-img"><img src="https://media.base44.com/images/public/69e1f4b87a927963a99283d5/ae10734b2_generated_8dba9834.png" alt="Blog 2"></div>
-        <div class="blog-meta"><span class="cat">Ritual</span><span class="sep">—</span><span class="date">Apr 08, 2026</span></div>
+      <article class="blog-card" onclick="openBlogModal(2)">
+        <div class="blog-img"><img
+            src="https://media.base44.com/images/public/69e1f4b87a927963a99283d5/ae10734b2_generated_8dba9834.png"
+            alt="Blog 2"></div>
+        <div class="blog-meta"><span class="cat">Ritual</span><span class="sep">—</span><span class="date">Apr 08,
+            2026</span></div>
         <h2>Ayurvedic Skincare Routine</h2>
         <p>A seven-step morning ritual, distilled from centuries of tradition and informed by modern dermatology.</p>
         <span class="blog-read">Read Article &#8594;</span>
       </article>
       <article class="blog-card" onclick="openBlogModal(3)">
         <div class="blog-img"><img src="blog3.jpeg" alt="Blog 3"></div>
-        <div class="blog-meta"><span class="cat">Guide</span><span class="sep">—</span><span class="date">Apr 01, 2026</span></div>
+        <div class="blog-meta"><span class="cat">Guide</span><span class="sep">—</span><span class="date">Apr 01,
+            2026</span></div>
         <h2>How to Choose the Right Soap</h2>
         <p>Decoding skin types, seasonality, and scent-profile — our complete OlifePlus pairing guide.</p>
         <span class="blog-read">Read Article &#8594;</span>
@@ -118,85 +182,95 @@
     </div>
   </div>
 
-  
-<!-- ════════════════════════════════════════ FOOTER ═══ -->
-<!-- ════════════════════════════════════════ FOOTER ═══ -->
-<footer>
-  <div class="container">
-    <div class="footer-inner">
-      <div>
-        <div class="footer-logo">
-          <img src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png" alt="OlifePlus">
-        </div>
-        <p class="footer-desc">
-          OlifePlus brings you precision-crafted Ayurvedic skincare — pure, botanical, and built for radiant everyday wellness.
-        </p>
 
-        <div class="footer-socials">
-          <a href="https://www.instagram.com/olifeplus?utm_source=qr&amp;igsh=cWQ0M2ZlcXhjNnVl" target="_blank" title="Instagram" style="text-decoration:none;">
-            <i class="fa-brands fa-instagram"></i>
-          </a>
-          <a href="tel:+918780803334" title="Contact" style="text-decoration:none;">
-            <i class="fa-solid fa-phone"></i>
-          </a>
-          <a href="https://wa.me/918780803334" target="_blank" title="WhatsApp" style="text-decoration:none;">
-            <i class="fa-brands fa-whatsapp"></i>
-          </a>
+  <!-- ════════════════════════════════════════ FOOTER ═══ -->
+  <!-- ════════════════════════════════════════ FOOTER ═══ -->
+ <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <div class="footer-logo">
+            <img
+              src="https://media.base44.com/images/public/user_69cc171d1c5e2cf96bf12d59/41ea8d620_olifeplusLogocopy.png"
+              alt="OlifePlus">
+          </div>
+          <p class="footer-desc">
+            OlifePlus offers Ayurvedic skincare products, natural soaps,
+            herbal beauty solutions, saffron skincare, skin brightening soaps,
+            organic wellness products and chemical-free skincare in India.
+          </p>
+
+          <div class="footer-socials">
+            <a href="https://www.instagram.com/olifeplus?utm_source=qr&amp;igsh=cWQ0M2ZlcXhjNnVl" target="_blank"
+              title="Instagram" style="text-decoration:none;">
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="tel:+918780803334" title="Contact" style="text-decoration:none;">
+              <i class="fa-solid fa-phone"></i>
+            </a>
+            <a href="https://wa.me/918780803334" target="_blank" title="WhatsApp" style="text-decoration:none;">
+              <i class="fa-brands fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="blog.html">Journal</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Care</h4>
+          <ul>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="tel:+918780803334">+91 87808 03334</a></li>
+            <li><span>info@olifeplus.com</span></li>
+          </ul>
         </div>
       </div>
 
-      <div class="footer-col">
-        <h4>Explore</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="products.html">Products</a></li>
-          <li><a href="about.html">About Us</a></li>
-          <li><a href="blog.html">Journal</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Care</h4>
-        <ul>
-          <li><a href="contact.html">Contact</a></li>
-          <li><a href="privacy.html">Privacy Policy</a></li>
-          <li><a href="tel:+918780803334">+91 87808 03334</a></li>
-          <li><span>info@olifeplus.com</span></li>
-        </ul>
+      <div class="footer-bottom">
+        <p>© 2026 OlifePlus. Advance Ayurveda. All rights reserved.</p>
+        <a href="https://www.visionboostmarketing.com" target="_blank" style="text-decoration:none;color:inherit;">
+          <p style="letter-spacing:.2em;text-transform:uppercase">
+            Created By VisionBoost Marketing
+          </p>
+        </a>
       </div>
     </div>
+  </footer>
+  <!-- BLOG POPUP -->
+  <div id="blog-modal" class="blog-modal">
+    <div class="blog-modal-content new-layout">
 
-    <div class="footer-bottom">
-      <p>© 2026 OlifePlus. Advance Ayurveda. All rights reserved.</p>
-      <p style="letter-spacing:.2em;text-transform:uppercase">Crafted with Organic Precision</p>
+      <span class="close-modal" onclick="closeBlogModal()">&times;</span>
+
+      <!-- LEFT IMAGE -->
+      <div class="modal-left">
+        <img id="modal-img">
+      </div>
+
+      <!-- RIGHT CONTENT -->
+      <div class="modal-right">
+        <h2 id="modal-title"></h2>
+
+        <h4>Use</h4>
+        <p id="modal-use"></p>
+
+        <h4>Advantages</h4>
+        <p id="modal-advantages"></p>
+      </div>
+
     </div>
   </div>
-</footer>
-<!-- BLOG POPUP -->
-<div id="blog-modal" class="blog-modal">
-  <div class="blog-modal-content new-layout">
 
-    <span class="close-modal" onclick="closeBlogModal()">&times;</span>
-
-    <!-- LEFT IMAGE -->
-    <div class="modal-left">
-      <img id="modal-img">
-    </div>
-
-    <!-- RIGHT CONTENT -->
-    <div class="modal-right">
-      <h2 id="modal-title"></h2>
-
-      <h4>Use</h4>
-      <p id="modal-use"></p>
-
-      <h4>Advantages</h4>
-      <p id="modal-advantages"></p>
-    </div>
-
-  </div>
-</div>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
+
 </html>

@@ -2022,7 +2022,7 @@ body {
 footer {
   background: var(--primary);
   color: var(--primary-fg);
-  margin-top: 80px
+  margin-top: 80px;
 }
 
 .footer-inner {
@@ -2499,7 +2499,6 @@ footer {
   #mobile-menu a{font-size:28px;}
   #mobile-account-link{font-size:12px !important;padding:11px 20px;}
 }
-<<<<<<< HEAD
 
 
 /* Mobile Responsive Enhancements */
@@ -2793,7 +2792,7 @@ body{
 /* FOOTER */
 footer{
     margin-top: 0 !important;
-    padding-top: 80px !important;
+    /* padding-top: 80px !important; */
 }
 
 /* ABOUT PAGE TOP SPACE FIX */
@@ -2822,6 +2821,3 @@ body[data-page="products"] .section:first-of-type{
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
-
-=======
->>>>>>> a74e79d52bda3dd45150f374d715cce5bde1563a
