@@ -207,13 +207,13 @@ setInterval(() => {
     // If order was cancelled, skip
     if (!order.orderId) return;
 
-    // Check if 5 minutes passed (300000ms)
+    // Check if 5 minutes passed (86400000ms)
     const createdTime = new Date(order.createdAt).getTime();
     const timeDiff = now - createdTime;
 
     console.log(`📋 Order: ${order.orderId} | Time passed: ${Math.floor(timeDiff / 1000)}s | Status: ${order.shipmentStatus}`);
 
-    if (timeDiff >= 300000) {  // 5 मिनट
+    if (timeDiff >= 86400000) {  // 5 मिनट
 
       console.log(`\n🚀 CREATING SHIPMENT for Order ${order.orderId} (waited ${Math.floor(timeDiff / 1000)}s)`);
 
@@ -408,7 +408,7 @@ app.post("/create-shipment", async (req, res) => {
       nimbusOrderId: "",
       nimbusResponse: null,
       createdAt: new Date().toISOString(),
-      shipmentScheduledFor: new Date(Date.now() + 300000).toISOString()
+      shipmentScheduledFor: new Date(Date.now() + 86400000).toISOString()
     };
 
     // REMOVE DUPLICATE
