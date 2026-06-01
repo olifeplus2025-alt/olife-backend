@@ -118,7 +118,7 @@
         localStorage.setItem("olifeplusNimbusResponse", JSON.stringify(data));
         if (data.success && data.order) {
           // showSuccess(`Shipment created ✓ AWB: ${data.awb}`);
-          showSuccess(`Shipment created ✓ Nimbus Order ID: ${data.order?.nimbusOrderId || "N/A"}`);
+          showSuccess(`Shipment created ✓ We Will Notify You Once The order is confirmed by.`);
           return {
             ...order,
             // awb: data.awb,

@@ -218,6 +218,7 @@
       <p class="sub">Enter your Order ID or open this page from My Account order history.</p>
     </div>
     <div class="content">
+      <h2><span>Note:</span><span style="color: red;"> You can cancel your order within 24 hours of placement.</span></h2> <br>
       <div class="search">
         <input id="orderIdInput" placeholder="Example: OLIFE-1234567890">
         <button class="btn" onclick="loadOrder()">Track</button>
@@ -295,10 +296,10 @@
       const stepsHtml = steps.map((step, index) => {
         const cls = index < currentStep ? "done" : (index === currentStep ? "active" : "");
         const text = index < currentStep ? "Completed" : (index === currentStep ? "Current status" : "Pending");
-        return `<div class="step ${cls}">
-          <div class="dot">${index < currentStep ? "✓" : index + 1}</div>
-          <div><div class="step-title">${step}</div><div class="step-text">${text}</div></div>
-        </div>`;
+        // return `<div class="step ${cls}">
+        //   <div class="dot">${index < currentStep ? "✓" : index + 1}</div>
+        //   <div><div class="step-title">${step}</div><div class="step-text">${text}</div></div>
+        // </div>`;
       }).join("");
 
       document.getElementById("result").className = "order-card";
